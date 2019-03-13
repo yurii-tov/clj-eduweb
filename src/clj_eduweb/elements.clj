@@ -1,0 +1,61 @@
+(ns clj-eduweb.elements
+  "API to handle various page elements"
+  (:require [clj-eduweb.core :refer :all]
+            [clojure.string :as cstr]))
+
+;; text inputs
+
+(defn get-inputs
+  ([context] (find-elements context (css "input[type=text]")))
+  ([] (get-inputs *driver*)))
+
+;; tables
+
+(defn get-tables
+  ([] (get-tables *driver*))
+  ([context] (find-elements context (css "table"))))
+
+(defn table-rows [table] (find-elements table (css "tr")))
+
+(defn table-column 
+  "table => either <table> element or list of <tr>
+  i      => index of column"
+  [table i]
+  (let [rows (if (coll? table) 
+               table 
+               (table-rows table))]
+    (->> rows 
+      (map (fn [r] (nth (find-elements r (css "td")) i))) 
+      (map (fn [t] (let [text (get-text t)] 
+             (when-not (empty? text) text)))))))
+
+;; radio buttons
+
+(defn get-radio-buttons [context]
+  (find-elements (css "input[type=radio]")))
+
+;; buttons
+
+(defn get-buttons [context]
+  (find-elements context (css "button")))
+
+(defn pressed? [button]
+  (= "true" (get-attribute button "aria-pressed")))
+
+;; dialog windows
+
+(defn get-windows [] (find-elements (css ".x-window")))
+
+(defn close-window [window]
+  (click (find-element window (css ".x-tool-close")))
+  (wait-for-stale window))
+
+;; context menu
+
+(defn get-context-menus []
+  (find-elements (css ".x-menu")))
+
+(defn get-context-menu-options [context]
+  (map (fn [x] (find-element x (css "span")))
+    (remove (fn [x] (cstr/includes? (get-attribute x "class") "x-menu-sep-li"))
+      (find-elements context (css ".x-menu-list-item")))))
