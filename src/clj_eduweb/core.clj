@@ -25,11 +25,11 @@
 (defn start-chromedriver 
   "Start new Chrome instance.
   Optional arguments:
-  :headless       turn on headless mode 
+  :headless       turn headless mode on/off 
   :implicit-wait  implicit wait (in seconds)"
   [& {:keys [headless implicit-wait]}]
   (let [chrome-options (new ChromeOptions)]
-    (when headless (. chrome-options setHeadless true))
+    (when headless (. chrome-options setHeadless headless))
     (let [chromedriver (new ChromeDriver chrome-options)]
       (when implicit-wait 
         (.. chromedriver 
