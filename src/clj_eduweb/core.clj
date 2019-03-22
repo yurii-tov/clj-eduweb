@@ -39,6 +39,9 @@
           (implicitlyWait implicit-wait TimeUnit/SECONDS)))
       (set-driver chromedriver))))
 
+(defn quit-driver []
+  (.quit *driver*))
+
 ;; find elements
 
 (defn css [selector]
