@@ -29,6 +29,7 @@
   :implicit-wait  implicit wait (in seconds)"
   [& {:keys [headless implicit-wait]}]
   (let [chrome-options (new ChromeOptions)]
+    (. chrome-options addArguments ["disable-infobars"])
     (when headless (. chrome-options setHeadless headless))
     (let [chromedriver (new ChromeDriver chrome-options)]
       (when implicit-wait 
