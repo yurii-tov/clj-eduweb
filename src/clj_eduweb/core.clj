@@ -42,6 +42,11 @@
 (defn quit-driver []
   (.quit *driver*))
 
+;; navigation
+
+(defn get-url [url]
+  (.get *driver* url))
+
 ;; find elements
 
 (defn css [selector]
