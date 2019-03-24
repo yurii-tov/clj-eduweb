@@ -22,21 +22,37 @@
   [driver]
   (def ^:dynamic *driver* driver))
 
-(defn start-chromedriver 
-  "Start new Chrome instance.
-  Optional arguments:
-  :headless       turn headless mode on/off 
-  :implicit-wait  implicit wait (in seconds)"
-  [& {:keys [headless implicit-wait]}]
+(defn config-webdriver 
+  "Set WebDriver-specific options.
+   Recognized options:
+   :implicit-wait  (implicit wait in seconds)"
+  [driver {:keys [implicit-wait]}]
+  (when implicit-wait 
+    (.. driver
+      manage
+      timeouts
+      (implicitlyWait implicit-wait TimeUnit/SECONDS))))
+
+(defmulti start-driver 
+  "Configure and start new webdriver instance, set *driver* dynamic var
+   Args:
+   options
+   Recognized keys: 
+   :browser   ; [keyword]           browser type
+   :args      ; [vector of strings] driver cli arguments
+   :headless? ; [boolean]           on/off headless mode"
+  :browser)
+
+(defmethod start-driver :chrome
+  [{:keys [args headless?]
+    :as options}]
   (let [chrome-options (new ChromeOptions)]
     (. chrome-options addArguments ["disable-infobars"])
-    (when headless (. chrome-options setHeadless headless))
+    (when headless? (. chrome-options setHeadless headless?))
+    (when (seq args)
+      (. chrome-options addArguments args))
     (let [chromedriver (new ChromeDriver chrome-options)]
-      (when implicit-wait 
-        (.. chromedriver 
-          manage 
-          timeouts 
-          (implicitlyWait implicit-wait TimeUnit/SECONDS)))
+      (config-webdriver chromedriver options)
       (set-driver chromedriver))))
 
 (defn quit-driver []
