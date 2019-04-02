@@ -60,7 +60,8 @@
 (defn start-chromedriver 
   "Start chromedriver with predefined list of options"
   [& {:keys [args headless? prefs]}]
-  (let [predefined-args ["disable-infobars"]]
+  (let [predefined-args  ["disable-infobars"]
+        predefined-prefs {}]
     (start-driver 
       {:browser   :chrome
   	   :args      (into predefined-args args)
