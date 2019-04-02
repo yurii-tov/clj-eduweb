@@ -48,7 +48,6 @@
   [{:keys [args prefs headless?]
     :as options}]
   (let [chrome-options (new ChromeOptions)]
-    (. chrome-options addArguments ["disable-infobars"])
     (when headless? (. chrome-options setHeadless headless?))
     (when (seq args)
       (. chrome-options addArguments args))
@@ -57,6 +56,16 @@
     (let [chromedriver (new ChromeDriver chrome-options)]
       (config-webdriver chromedriver options)
       (set-driver chromedriver))))
+
+(defn start-chromedriver 
+  "Start chromedriver with predefined list of options"
+  [& {:keys [args headless? prefs]}]
+  (let [predefined-args ["disable-infobars"]]
+    (start-driver 
+      {:browser   :chrome
+  	   :args      (into predefined-args args)
+  	   :headless? headless?
+  	   :prefs     (merge predefined-prefs prefs)})))
 
 (defn quit-driver []
   (.quit *driver*))
