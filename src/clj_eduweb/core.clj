@@ -40,17 +40,20 @@
    Recognized keys: 
    :browser   ; [keyword]           browser type
    :args      ; [vector of strings] driver cli arguments
+   :prefs     ; [map]               'preferences' experimental option
    :headless? ; [boolean]           on/off headless mode"
   :browser)
 
 (defmethod start-driver :chrome
-  [{:keys [args headless?]
+  [{:keys [args prefs headless?]
     :as options}]
   (let [chrome-options (new ChromeOptions)]
     (. chrome-options addArguments ["disable-infobars"])
     (when headless? (. chrome-options setHeadless headless?))
     (when (seq args)
       (. chrome-options addArguments args))
+    (when prefs
+      (. chrome-options setExperimentalOption "prefs" prefs))
     (let [chromedriver (new ChromeDriver chrome-options)]
       (config-webdriver chromedriver options)
       (set-driver chromedriver))))
