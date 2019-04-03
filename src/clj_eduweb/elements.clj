@@ -31,13 +31,15 @@
 
 ;; radio buttons
 
-(defn get-radio-buttons [context]
-  (find-elements (css "input[type=radio]")))
+(defn get-radio-buttons 
+  ([context] (find-elements (css "input[type=radio]")))
+  ([] (get-radio-buttons *driver*)))
 
 ;; buttons
 
-(defn get-buttons [context]
-  (find-elements context (css "button")))
+(defn get-buttons 
+  ([context] (find-elements context (css "button")))
+  ([] (get-buttons *driver*)))
 
 (defn pressed? [button]
   (= "true" (get-attribute button "aria-pressed")))
@@ -55,10 +57,12 @@
 (defn get-context-menus []
   (find-elements (css ".x-menu")))
 
-(defn get-context-menu-options [context]
-  (map (fn [x] (find-element x (css "span")))
-    (remove (fn [x] (cstr/includes? (get-attribute x "class") "x-menu-sep-li"))
-      (find-elements context (css ".x-menu-list-item")))))
+(defn get-context-menu-options 
+  ([context]
+    (map (fn [x] (find-element x (css "span")))
+      (remove (fn [x] (cstr/includes? (get-attribute x "class") "x-menu-sep-li"))
+        (find-elements context (css ".x-menu-list-item")))))
+  ([] (get-context-menu-options *driver*)))
 
 ;; combo list menu
 
