@@ -6,7 +6,9 @@
 ;; text inputs
 
 (defn get-inputs
-  ([context] (find-elements context (css "input[type=text]")))
+  ([context] 
+   (find-elements context 
+     (css "input[type=text], input[type=password]")))
   ([] (get-inputs *driver*)))
 
 ;; tables
