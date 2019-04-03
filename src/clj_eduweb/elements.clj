@@ -59,3 +59,9 @@
   (map (fn [x] (find-element x (css "span")))
     (remove (fn [x] (cstr/includes? (get-attribute x "class") "x-menu-sep-li"))
       (find-elements context (css ".x-menu-list-item")))))
+
+;; combo list menu
+
+(defn get-combo-lists
+  ([context] (find-elements context (css ".x-combo-list-inner")))
+  ([] (get-combo-lists *driver*)))
