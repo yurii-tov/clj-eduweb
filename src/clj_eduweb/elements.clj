@@ -65,3 +65,7 @@
 (defn get-combo-lists
   ([context] (find-elements context (css ".x-combo-list-inner")))
   ([] (get-combo-lists *driver*)))
+
+(defn get-combo-list-options
+  ([context] (find-elements context (css "[role=listitem]")))
+  ([] (get-combo-list-options *driver*)))
