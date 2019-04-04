@@ -61,14 +61,14 @@
   "Start chromedriver with predefined list of options;
   Also support keyword arguments for custom options
   (see (doc start-driver) for available keys)"
-  [& {:keys [args headless? prefs]}]
+  [& {:keys [args prefs] :as options}]
   (let [predefined-args  ["disable-infobars"]
         predefined-prefs {}]
     (start-driver 
-      {:browser   :chrome
-  	   :args      (into predefined-args args)
-  	   :headless? headless?
-  	   :prefs     (merge predefined-prefs prefs)})))
+      (merge options
+        {:browser :chrome
+  	     :args    (into predefined-args args)
+  	     :prefs   (merge predefined-prefs prefs)}))))
 
 (defn quit-driver []
   (.quit *driver*))
