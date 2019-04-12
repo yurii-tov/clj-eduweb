@@ -48,12 +48,12 @@
 (defn get-cells [] (find-elements *driver* (css "td.mark-cell")))
 
 (defn get-columns []
-  (->> (get-cells)
-    (group-by 
-      (fn [col] (re-find #"markColumn\d+" 
-                  (get-attribute col "class"))))
-    vals
-    vec))
+  (let [cells (get-cells)
+        get-col-num (fn [c] 
+                      (second (re-find #"x-grid3-td-markColumn(\d+)" 
+                                (get-attribute c "class"))))
+        col-count (count (set (map get-col-num cells)))]
+    (apply map vector (partition col-count cells))))
 
 (defn get-column [taskname]
   ((get-columns) 
