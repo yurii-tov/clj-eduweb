@@ -60,14 +60,16 @@
    (. (mapv get-text (get-tasks)) indexOf taskname)))
 
 (defmacro foreach-cell
-  "apply cell-fn to each cell found by find-cells-expression.
-  find-cells-expression evaluates for each step in order to avoid staleness"
-  ([find-cells-expression
-    cell-fn]
-   `(dorun
-      (map (fn [~'i] (~cell-fn ((vec ~find-cells-expression) ~'i)))
-        (range 0 (count ~find-cells-expression)))))
-  ([cell-fn] `(foreach-cell (get-cells) ~cell-fn)))
+  "Let there be n cells, found by find-cells-expression.
+  Based on that, n times evaluates binding form and perform body
+  (Avoids staleness of cells during iteration)"
+  [[cell find-cells-expression]
+   & body]
+  `(dorun
+     (map (fn [~'i]
+            (let [~cell ((vec ~find-cells-expression) ~'i)] 
+              (do ~@body)))
+       (range 0 (count ~find-cells-expression)))))
 
 ; marks
 
@@ -100,10 +102,9 @@
         (click (rand-nth buttons))))))
 
 (defn set-random-marks [& marks-to-exclude]
-  (foreach-cell
-    (fn [cell] 
-     (and (> (rand-int 10) 0)
-      (apply set-random-mark cell marks-to-exclude)))))
+  (foreach-cell [cell (get-cells)]
+    (and (> (rand-int 10) 0)
+      (apply set-random-mark cell marks-to-exclude))))
 
 (defn fill-column [column marks]
   (dorun
