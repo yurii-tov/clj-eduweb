@@ -26,7 +26,8 @@
   "Set WebDriver-specific options.
    Recognized options:
    :implicit-wait  (implicit wait in seconds)"
-  [driver {:keys [implicit-wait]}]
+  [driver {:keys [implicit-wait]
+  	       :or {implicit-wait 3}}]
   (when implicit-wait 
     (.. driver
       manage
