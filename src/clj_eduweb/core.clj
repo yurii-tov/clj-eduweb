@@ -84,6 +84,9 @@
 (defn css [selector]
   (By/cssSelector selector))
 
+(defn xpath [selector]
+  (By/xpath selector))
+
 (defn find-elements
   ([context selector]
     (vec (. context findElements selector)))
