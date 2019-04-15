@@ -12,18 +12,44 @@
   (apply str (take 8 (uuid))))
 
 (defn add-task
-  ([] (add-task (gen-taskname)))
-  ([title]
+  "Add new task.
+  Arguments: hashmap of options
+  Reference:
+   ; -------------
+   ; basic options
+   ; -------------
+  {:title \"task title\" ; :random by default
+   :control-work? false  ; check \"control work\" checkbox? false by default, may be :random
+   :date \"15.07.19\"    ; date of task
+   ; ----------------
+   ; advanced options
+   ; ----------------
+   :scale \"scale name\" ; explicitly set scale for this task
+   }"
+  [{:keys [title control-work? date scale]
+  	:or {title :random}}]
     (click (find-element (css "#e4-journal-TaskList-addTaskButton button")))
     (let [tasks-count (count (get-tasks))
           [window] (get-windows)
           [button] (get-buttons window)
-          [_ title-input] (get-inputs window)]
-      (send-keys title-input title)
+          [_ title-input] (get-inputs window)
+          set-control-work (fn [option])] ; todo implement
+      (send-keys title-input 
+        (if (= title :random)
+          (gen-taskname)
+          title))
+      (when control-work?
+        (if (= control-work? :random)
+          (and (zero? (rand-int 2)) (set-control-work true))
+          (set-control-work control-work?)))
+      (when date
+        ) ; todo implement
+      (when scale
+        ) ; todo implement
       (click button)
       (wait-for-stale window)
       (wait-for (condition (> (count (get-tasks)) 
-                              tasks-count))))))
+                              tasks-count)))))
 
 ; total marks
 
