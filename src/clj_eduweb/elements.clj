@@ -34,8 +34,20 @@
 ;; radio buttons
 
 (defn get-radio-buttons 
-  ([context] (find-elements (css "input[type=radio]")))
+  ([context] (find-elements context (css "input[type=radio]")))
   ([] (get-radio-buttons *driver*)))
+
+;; checkboxes
+
+(defn get-checkboxes
+  ([context] (find-elements context (css "input[type=checkbox]")))
+  ([] (get-checkboxes *driver*)))
+
+(defn set-checkbox [checkbox option]
+  (let [checked? (get-attribute checkbox "checked")]
+    (if option
+      (or checked? (click checkbox))
+      (and checked? (click checkbox)))))
 
 ;; buttons
 
