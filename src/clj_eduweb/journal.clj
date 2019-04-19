@@ -26,14 +26,18 @@
    ; ----------------
    :scale \"scale name\" ; explicitly set scale for this task
    }"
-  [{:keys [title control-work? date scale]
-  	:or {title :random}}]
+  ([] (add-task {}))
+  ([{:keys [title control-work? date scale]
+  	 :or {title :random}}]
     (click (find-element (css "#e4-journal-TaskList-addTaskButton button")))
     (let [tasks-count (count (get-tasks))
           [window] (get-windows)
           [button] (get-buttons window)
           [_ title-input] (get-inputs window)
-          set-control-work (fn [option])] ; todo implement
+          set-control-work (fn [option] 
+                             (set-checkbox 
+                               (first (get-checkboxes window)) 
+                               option))]
       (send-keys title-input 
         (if (= title :random)
           (gen-taskname)
@@ -49,7 +53,7 @@
       (click button)
       (wait-for-stale window)
       (wait-for (condition (> (count (get-tasks)) 
-                              tasks-count)))))
+                              tasks-count))))))
 
 ; total marks
 
