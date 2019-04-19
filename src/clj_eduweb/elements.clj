@@ -80,6 +80,33 @@
 
 ;; combo list menu
 
+(defn get-comboboxes
+  ([] (get-comboboxes *driver*))
+  ([context] (find-elements context (css "[role=combobox]"))))
+
+(defn expand-combobox [combobox]
+  (click (find-element combobox (css "img.x-form-trigger-arrow"))))
+
+(def collapse-combobox 
+  "just an alias to expand-combobox, for clarity"
+  expand-combobox)
+
+(defn select-combobox 
+  "select an option in given combobox.
+  if provide keyword :random provided, option selected in random order"
+  [combobox option]
+  (expand-combobox combobox)
+  (let [options-list (get-combo-list-options)]
+    (click (if (= option :random)
+             (rand-nth options-list)
+             (or (first (filter 
+                          (fn [o] (= (get-text o) option)) 
+                          options-list))
+                 (throw (new IllegalStateException
+                          (str "option not found: " option 
+                            "; avalilable options is: "
+                            (mapv get-text options-list)))))))))
+
 (defn get-combo-lists
   ([context] (find-elements context (css ".x-combo-list-inner")))
   ([] (get-combo-lists *driver*)))

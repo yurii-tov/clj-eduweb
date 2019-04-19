@@ -32,7 +32,7 @@
     (click (find-element (css "#e4-journal-TaskList-addTaskButton button")))
     (let [tasks-count (count (get-tasks))
           [window] (get-windows)
-          [button] (get-buttons window)
+          [button :as buttons] (get-buttons window)
           [_ title-input] (get-inputs window)
           set-control-work (fn [option] 
                              (set-checkbox 
@@ -49,7 +49,9 @@
       (when date
         (send-keys (first (get-inputs window)) date))
       (when scale
-        ) ; todo implement
+        (click (last buttons))
+        (click (last (get-checkboxes window)))
+        (select-combobox (last (get-comboboxes window)) scale))
       (click button)
       (wait-for-stale window)
       (wait-for (condition (> (count (get-tasks)) 
