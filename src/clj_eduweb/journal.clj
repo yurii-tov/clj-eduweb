@@ -19,7 +19,7 @@
    ; basic options
    ; -------------
   {:title \"task title\" ; :random by default
-   :control-work? false  ; check \"control work\" checkbox? false by default, may be :random
+   :control-work? false  ; check \"control work\" checkbox?
    :date \"15.07.19\"    ; date of task
    ; ----------------
    ; advanced options
@@ -33,19 +33,15 @@
     (let [tasks-count (count (get-tasks))
           [window] (get-windows)
           [button :as buttons] (get-buttons window)
-          [_ title-input] (get-inputs window)
-          set-control-work (fn [option] 
-                             (set-checkbox 
-                               (first (get-checkboxes window)) 
-                               option))]
+          [_ title-input] (get-inputs window)]
       (send-keys title-input 
         (if (= title :random)
           (gen-taskname)
           title))
       (when control-work?
-        (if (= control-work? :random)
-          (and (zero? (rand-int 2)) (set-control-work true))
-          (set-control-work control-work?)))
+        (set-checkbox 
+          (first (get-checkboxes window)) 
+          control-work?))
       (when date
         (send-keys (first (get-inputs window)) date))
       (when scale

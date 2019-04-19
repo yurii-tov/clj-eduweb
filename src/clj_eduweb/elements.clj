@@ -43,11 +43,16 @@
   ([context] (find-elements context (css "input[type=checkbox]")))
   ([] (get-checkboxes *driver*)))
 
-(defn set-checkbox [checkbox option]
-  (let [checked? (get-attribute checkbox "checked")]
-    (if option
-      (or checked? (click checkbox))
-      (and checked? (click checkbox)))))
+(defn set-checkbox
+  "set checkbox to on or off.
+  if :random keyword provided, set random value"
+  [checkbox option]
+  (if (= option :random)
+    (set-checkbox checkbox (zero? (rand-int 2)))
+    (let [checked? (get-attribute checkbox "checked")]
+      (if option
+        (or checked? (click checkbox))
+        (and checked? (click checkbox))))))
 
 ;; buttons
 
