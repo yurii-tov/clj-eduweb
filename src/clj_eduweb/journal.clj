@@ -135,10 +135,3 @@
   (foreach-cell [cell (get-cells)]
     (and (> (rand-int 10) 0)
       (apply set-random-mark cell marks-to-exclude))))
-
-(defn fill-column [column marks]
-  (dorun
-    (map (fn [cell mark] 
-           (when mark (set-mark cell mark)))
-      column 
-      marks)))
