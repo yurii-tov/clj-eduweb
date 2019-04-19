@@ -47,7 +47,7 @@
           (and (zero? (rand-int 2)) (set-control-work true))
           (set-control-work control-work?)))
       (when date
-        ) ; todo implement
+        (send-keys (first (get-inputs window)) date))
       (when scale
         ) ; todo implement
       (click button)
