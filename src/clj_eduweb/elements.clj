@@ -85,6 +85,14 @@
 
 ;; combo list menu
 
+(defn get-combo-lists
+  ([context] (find-elements context (css ".x-combo-list-inner")))
+  ([] (get-combo-lists *driver*)))
+
+(defn get-combo-list-options
+  ([context] (find-elements context (css "[role=listitem]")))
+  ([] (get-combo-list-options *driver*)))
+
 (defn get-comboboxes
   ([] (get-comboboxes *driver*))
   ([context] (find-elements context (css "[role=combobox]"))))
@@ -111,11 +119,3 @@
                           (str "option not found: " option 
                             "; avalilable options is: "
                             (mapv get-text options-list)))))))))
-
-(defn get-combo-lists
-  ([context] (find-elements context (css ".x-combo-list-inner")))
-  ([] (get-combo-lists *driver*)))
-
-(defn get-combo-list-options
-  ([context] (find-elements context (css "[role=listitem]")))
-  ([] (get-combo-list-options *driver*)))
