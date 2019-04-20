@@ -11,3 +11,5 @@ pom.xml.asc
 .hgignore
 .hg/
 /sandbox.clj
+/.cpcache
+.rebel_readline_history
