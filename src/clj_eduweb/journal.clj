@@ -24,10 +24,17 @@
    ; ----------------
    ; advanced options
    ; ----------------
+   :lesson-type \"name of lesson type\"
+   :activity \"name of activity\"
    :scale \"scale name\" ; explicitly set scale for this task
    }"
   ([] (add-task {}))
-  ([{:keys [title control-work? date scale]
+  ([{:keys [title
+  	        control-work?
+            date
+            lesson-type
+            activity
+            scale]
   	 :or {title :random}}]
     (click (find-element (css "#e4-journal-TaskList-addTaskButton button")))
     (let [tasks-count (count (get-tasks))
@@ -44,10 +51,18 @@
           control-work?))
       (when date
         (send-keys (first (get-inputs window)) date))
-      (when scale
+      (when (or lesson-type activity scale)
         (click (last buttons))
-        (click (last (get-checkboxes window)))
-        (select-combobox (last (get-comboboxes window)) scale))
+        (let [[lesson-type-combo
+               activity-combo
+               scale-combo] (get-comboboxes window)]
+          (dorun (map (fn [combo value] 
+                        (when value (select-combobox combo value))) 
+                      [lesson-type-combo activity-combo]
+                      [lesson-type activity]))
+          (when scale
+            (click (last (get-checkboxes window)))
+            (select-combobox scale-combo scale))))
       (click button)
       (wait-for-stale window)
       (wait-for (condition (> (count (get-tasks)) 
