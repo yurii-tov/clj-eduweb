@@ -89,9 +89,10 @@
   ([context] (find-elements context (css ".x-combo-list-inner")))
   ([] (get-combo-lists *driver*)))
 
-(defn get-combo-list-options
+(defn get-combo-listitems
+  "Get list items (as web elements) from given context"
   ([context] (find-elements context (css "[role=listitem]")))
-  ([] (get-combo-list-options *driver*)))
+  ([] (get-combo-listitems *driver*)))
 
 (defn get-comboboxes
   ([] (get-comboboxes *driver*))
@@ -109,7 +110,7 @@
   if provide keyword :random provided, option selected in random order"
   [combobox option]
   (expand-combobox combobox)
-  (let [options-list (get-combo-list-options)]
+  (let [options-list (get-combo-listitems)]
     (click (if (= option :random)
              (rand-nth options-list)
              (or (first (filter 
