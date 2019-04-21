@@ -123,3 +123,11 @@
                           (str "option not found: " option 
                             "; avalilable options is: "
                             (mapv get-text options-list)))))))))
+
+(defn get-combobox-options
+  "Get list of given combobox options (as list of strings)"
+  [combobox]
+  (expand-combobox combobox)
+  (let [options (mapv get-text (get-combo-listitems))]
+    (collapse-combobox combobox)
+    options))
