@@ -61,7 +61,7 @@
                       [lesson-type-combo activity-combo]
                       [lesson-type activity]))
           (when scale
-            (click (last (get-checkboxes window)))
+            (set-checkbox (last (get-checkboxes window)) true)
             (select-combobox scale-combo scale))))
       (click button)
       (wait-for-stale window)
