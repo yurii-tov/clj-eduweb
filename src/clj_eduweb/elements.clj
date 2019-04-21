@@ -106,10 +106,13 @@
   expand-combobox)
 
 (defn select-combobox 
-  "select an option in given combobox.
-  if provide keyword :random provided, option selected in random order"
+  "Select an option in given combobox.
+  Assume there is only one opened combo list at a time.
+  if keyword :random provided, option selected in random order"
   [combobox option]
   (expand-combobox combobox)
+  (assert (= 1 (count (get-combo-lists)))
+          "There is several opened combo lists")
   (let [options-list (get-combo-listitems)]
     (click (if (= option :random)
              (rand-nth options-list)
