@@ -83,7 +83,7 @@
         (find-elements context (css ".x-menu-list-item")))))
   ([] (get-context-menu-options *driver*)))
 
-;; combo list menu
+;; comboboxes
 
 (defn get-combo-lists
   ([context] (find-elements context (css ".x-combo-list-inner")))
