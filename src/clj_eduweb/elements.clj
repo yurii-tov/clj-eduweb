@@ -99,11 +99,12 @@
   ([context] (find-elements context (css "[role=combobox]"))))
 
 (defn expand-combobox [combobox]
-  (click (find-element combobox (css "img.x-form-trigger-arrow"))))
+  (with-retry
+    (click (find-element combobox (css "img.x-form-trigger-arrow")))
+    (wait-for (condition (= 1 (count (get-combo-lists)))))))
 
-(def collapse-combobox 
-  "just an alias to expand-combobox, for clarity"
-  expand-combobox)
+(defn collapse-combobox [combobox] 
+  (click (find-element combobox (css "img.x-form-trigger-arrow"))))
 
 (defn select-combobox 
   "Select an option in given combobox.
