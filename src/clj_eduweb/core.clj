@@ -139,6 +139,11 @@
      (~'apply [driver#] ~body) 
      (~'toString [] (str "condition: " '~body))))
 
+(defmacro with-retry
+  "Perform an action, and if any exception occurs, retry"
+  [& body]
+  `(try ~@body (catch Throwable ~'t ~@body)))
+
 (defn wait-for-stale [el]
   (wait-for (ExpectedConditions/stalenessOf el)))
 
