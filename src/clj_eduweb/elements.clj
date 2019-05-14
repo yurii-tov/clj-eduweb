@@ -99,21 +99,21 @@
   ([context] (find-elements context (css "[role=combobox]"))))
 
 (defn expand-combobox
-  "Expand given combobox, ensure there is only one combolist appeared.
-   Returns combolist"
+  "Expand given combobox, ensure there is only one combo-list appeared.
+   Returns combo-list"
   [combobox]
   (with-retry
     (click (find-element combobox (css "img.x-form-trigger-arrow")))
-    (wait-for (condition (let [combolists (get-combo-lists)]
-                           (and (= 1 (count combolists))
-                                (first combolists)))))))
+    (wait-for (condition (let [combo-lists (get-combo-lists)]
+                           (and (= 1 (count combo-lists))
+                                (first combo-lists)))))))
 
 (defn collapse-combobox
   [combobox]
-  (let [[combolist] (get-combo-lists)]
-    (when combolist
+  (let [[combo-list] (get-combo-lists)]
+    (when combo-list
       (click (find-element combobox (css "img.x-form-trigger-arrow")))
-      (wait-for-stale combolist))))
+      (wait-for-stale combo-list))))
 
 (defn select-combobox 
   "Select an option in given combobox.
