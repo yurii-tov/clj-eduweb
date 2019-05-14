@@ -103,8 +103,15 @@
     (click (find-element combobox (css "img.x-form-trigger-arrow")))
     (wait-for (condition (= 1 (count (get-combo-lists)))))))
 
-(defn collapse-combobox [combobox] 
-  (click (find-element combobox (css "img.x-form-trigger-arrow"))))
+(defn collapse-combobox
+  "Collapse given combo. Assume there is only single combobox expanded"
+  [combobox]
+  (let [[combolist :as combolists] (get-combo-lists)]
+    (assert (<= (count combolists) 1)
+            "There is several opened combo lists")
+    (when combolist
+      (click (find-element combobox (css "img.x-form-trigger-arrow")))
+      (wait-for-stale combolist))))
 
 (defn select-combobox 
   "Select an option in given combobox.
