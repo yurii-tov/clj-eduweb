@@ -120,8 +120,7 @@
   Assume there is only one opened combo list at a time.
   if keyword :random provided, option selected in random order"
   [combobox option]
-  (expand-combobox combobox)
-  (let [options-list (get-combo-listitems)]
+  (let [options-list (get-combo-listitems (expand-combobox combobox))]
     (click (if (= option :random)
              (rand-nth options-list)
              (or (first (filter 
