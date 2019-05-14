@@ -98,10 +98,15 @@
   ([] (get-comboboxes *driver*))
   ([context] (find-elements context (css "[role=combobox]"))))
 
-(defn expand-combobox [combobox]
+(defn expand-combobox
+  "Expand given combobox, ensure there is only one combolist appeared.
+   Returns combolist"
+  [combobox]
   (with-retry
     (click (find-element combobox (css "img.x-form-trigger-arrow")))
-    (wait-for (condition (= 1 (count (get-combo-lists)))))))
+    (wait-for (condition (let [combolists (get-combo-lists)]
+                           (and (= 1 (count combolists))
+                                (first combolists)))))))
 
 (defn collapse-combobox
   [combobox]
