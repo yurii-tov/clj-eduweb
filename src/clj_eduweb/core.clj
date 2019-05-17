@@ -4,7 +4,7 @@
     (org.openqa.selenium.chrome 
       ChromeDriver 
       ChromeOptions) 
-    (org.openqa.selenium WebElement By) 
+    (org.openqa.selenium WebElement By OutputType) 
     org.openqa.selenium.interactions.Actions 
     (org.openqa.selenium.support.ui 
       FluentWait
@@ -13,7 +13,8 @@
     java.time.Duration
     java.util.concurrent.TimeUnit
     java.util.UUID)
-  (:require [clojure.string :as cstr]))
+  (:require [clojure.string :as cstr]
+            [clojure.java.io :as io]))
 
 ;; driver management
 
@@ -78,6 +79,15 @@
 
 (defn get-url [url]
   (.get *driver* url))
+
+;; take screenshots
+
+(defn take-screenshot
+  "Take screenshot of the page.
+  Save it to given path"
+  [file-path]
+  (io/copy (.getScreenshotAs *driver* OutputType/FILE)
+           (io/file file-path)))
 
 ;; find elements
 
