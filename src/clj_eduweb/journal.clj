@@ -102,18 +102,6 @@
   ((get-columns) 
    (. (mapv get-text (get-tasks)) indexOf taskname)))
 
-(defmacro foreach-cell
-  "Let there be n cells, found by find-cells-expression.
-  Based on that, n times evaluates binding form and perform body
-  (Avoids staleness of cells during iteration)"
-  [[cell find-cells-expression]
-   & body]
-  `(dorun
-     (map (fn [~'i]
-            (let [~cell ((vec ~find-cells-expression) ~'i)] 
-              (do ~@body)))
-       (range 0 (count ~find-cells-expression)))))
-
 ; marks
 
 (defn edit-mark 
@@ -145,6 +133,6 @@
         (click (rand-nth buttons))))))
 
 (defn set-random-marks [& marks-to-exclude]
-  (foreach-cell [cell (get-cells)]
+  (foreach-element [cell (get-cells)]
     (and (> (rand-int 10) 0)
       (apply set-random-mark cell marks-to-exclude))))

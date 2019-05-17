@@ -147,6 +147,20 @@
 (defn wait-for-stale [el]
   (wait-for (ExpectedConditions/stalenessOf el)))
 
+;; control structures
+
+(defmacro foreach-element
+  "Find n elements by find-expression.
+  Then, n times evaluates find-expression and perform body with nth element binded.
+  This function is useful when perform destructive actions over collection of elements. For example, actions with nth element invalidate n+1th element"
+  [[element find-expression]
+   & body]
+  `(dorun
+     (map (fn [~'i]
+            (let [~element ((vec ~find-expression) ~'i)] 
+              (do ~@body)))
+       (range 0 (count ~find-expression)))))
+
 ;; utils
 
 (defn uuid []
