@@ -138,3 +138,8 @@
   (let [options (mapv get-text (get-combo-listitems))]
     (collapse-combobox combobox)
     options))
+
+(defn get-combobox-value
+  "Get current selected value of a combobox"
+  [combo]
+  (get-attribute (first (get-inputs combo)) "value"))
