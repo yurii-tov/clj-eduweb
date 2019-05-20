@@ -117,8 +117,7 @@
 
 (defn select-combobox 
   "Select an option in given combobox.
-  Assume there is only one opened combo list at a time.
-  if keyword :random provided, option selected in random order"
+  If keyword :random provided, select random option"
   [combobox option]
   (let [options-list (get-combo-listitems (expand-combobox combobox))]
     (click (if (= option :random)
