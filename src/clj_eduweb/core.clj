@@ -84,10 +84,20 @@
 
 (defn take-screenshot
   "Take screenshot of the page.
-  Save it to given path"
-  [file-path]
-  (io/copy (.getScreenshotAs *driver* OutputType/FILE)
-           (io/file file-path)))
+  Argument is either string (path to file) or keyword denotes output type
+  (available is :base64 and :bytes)"
+  [output]
+  (cond (string? output)
+        (let [screenshot (io/file output)]
+          (io/copy (.getScreenshotAs *driver* OutputType/FILE)
+                   screenshot)
+          screenshot)
+        (= output :base64)
+        (.getScreenshotAs *driver* OutputType/BASE64)
+        (= output :bytes)
+        (.getScreenshotAs *driver* OutputType/BYTES)
+        :else
+        (throw (new IllegalStateException (str "Wrong argument: " output)))))
 
 ;; find elements
 
