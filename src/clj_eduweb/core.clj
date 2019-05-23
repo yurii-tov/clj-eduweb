@@ -18,10 +18,18 @@
 
 ;; driver management
 
-(defn set-driver 
-  "assign *driver* dynamic variable"
+(defn init-driver 
+  "Initialize *driver* dynamic variable, if not yet initialized.
+  Return its argument (driver)"
   [driver]
-  (def ^:dynamic *driver* driver))
+  (defonce ^:dynamic *driver* driver)
+  driver)
+
+(defmacro with-driver 
+  "Perform body with *driver* variable bound to driver"
+  [driver & body]
+  `(binding [*driver* ~driver]
+     ~@body))
 
 (defn config-webdriver 
   "Set WebDriver-specific options.
@@ -57,7 +65,7 @@
       (. chrome-options setExperimentalOption "prefs" prefs))
     (let [chromedriver (new ChromeDriver chrome-options)]
       (config-webdriver chromedriver options)
-      (set-driver chromedriver))))
+      (init-driver chromedriver))))
 
 (defn start-chromedriver 
   "Start chromedriver with predefined list of options;
