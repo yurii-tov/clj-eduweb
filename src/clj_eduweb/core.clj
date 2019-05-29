@@ -4,7 +4,11 @@
     (org.openqa.selenium.chrome 
       ChromeDriver 
       ChromeOptions) 
-    (org.openqa.selenium WebElement By OutputType) 
+    (org.openqa.selenium 
+     WebElement 
+     By 
+     OutputType 
+     StaleElementReferenceException) 
     org.openqa.selenium.interactions.Actions 
     (org.openqa.selenium.support.ui 
       FluentWait
@@ -139,6 +143,12 @@
 
 (defn displayed? [el]
   (. el isDisplayed))
+
+(defn stale?
+	"Test if given element does not attached to DOM"
+  [element]
+  (try (not (.getLocation element))
+       (catch StaleElementReferenceException e true)))
 
 (defn get-attribute [el attr]
   (. el getAttribute attr))
