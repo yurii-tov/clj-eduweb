@@ -203,3 +203,16 @@
 
 (defn uuid []
   (str (UUID/randomUUID)))
+
+(defn set-css-property
+  "Set given css property of element.
+  Example:
+  (set-css-property (find-element (css \"button\"))
+                    \"background-color\"
+                    \"green\")"
+  [el prop value]
+  (.executeScript *driver*
+                  (format "arguments[0].style['%s'] = '%s';"
+                          prop
+                          value)
+                  (into-array [el])))
