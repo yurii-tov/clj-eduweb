@@ -216,3 +216,30 @@
                           prop
                           value)
                   (into-array [el])))
+
+;; elements highlighting
+
+(let [colored (atom {})]
+
+	(defn remove-highlights
+		"Back all elements previously colored by highlight fn, to its normal color"
+	  []
+	  (doseq [[el color] @colored]
+      (when-not (stale? el)
+        (set-css-property el "background-color" color)))
+      (reset! colored {}))
+
+  (defn highlight
+    "Highlight given element (or collection of elements) with bright color.
+    Before that, remove old marks (by default)"
+    [target & {:keys [remove-old-marks] 
+    	         :or {remove-old-marks true}}]
+    (when remove-old-marks
+      (remove-highlights))
+    (if (coll? target)
+      (dorun (map (fn [el] (highlight el :remove-old-marks false))
+                  target))
+      (let [old-color (.getCssValue target "background-color")]
+        (swap! colored
+               (fn [m] (assoc m target old-color)))
+        (set-css-property target "background-color" "yellow")))))
