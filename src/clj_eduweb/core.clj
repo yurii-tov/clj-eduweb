@@ -139,13 +139,16 @@
 
 (defn double-click [el] (.. (new Actions *driver*) (doubleClick el) perform))
 
+;; get information about elements
+
 (defn get-text [el] (cstr/trim (. el getText)))
 
 (defn displayed? [el]
   (. el isDisplayed))
 
 (defn stale?
-	"Test if given element does not attached to DOM"
+	"Test if given element is not available in a DOM
+	(i.e. request to this element will cause StaleElementReferenceException)"
   [element]
   (try (not (.getLocation element))
        (catch StaleElementReferenceException e true)))
