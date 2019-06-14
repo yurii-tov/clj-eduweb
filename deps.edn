@@ -3,5 +3,6 @@
            {:mvn/version "3.141.59"}
            org.clojure/clojure
            {:mvn/version "1.10.0"}}
-    :paths ["src"]       
+    :paths ["src"]
+    :aliases {:dev {:extra-paths ["dev"]}}
 }
