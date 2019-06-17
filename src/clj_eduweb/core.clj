@@ -18,7 +18,8 @@
     java.util.concurrent.TimeUnit
     java.util.UUID)
   (:require [clojure.string :as cstr]
-            [clojure.java.io :as io]))
+            [clojure.java.io :as io]
+            [clojure.set :as cset]))
 
 ;; driver management
 
@@ -91,6 +92,14 @@
 
 (defn get-url [url]
   (.get *driver* url))
+
+(defmacro open-popup
+  "Save current set of opened windows, then perform body (assuming new opened windows), then return set of newly opened windows"
+  [& body]
+  `(let [popups# (set (.. *driver* ~'getWindowHandles))]
+     (do ~@body)
+     (cset/difference (set (.. *driver* ~'getWindowHandles))
+                      popups#)))
 
 ;; take screenshots
 
