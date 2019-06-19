@@ -114,7 +114,10 @@
     (close-window w)
     (wait-for-stale cell)))
 
-(defn set-mark [cell mark]
+(defn set-mark 
+  "Set specific mark to given cell. 
+  For randomness use set-random-mark or set-random-marks functions"
+  [cell mark]
   (edit-mark cell 
     (fn [w] (->> w get-buttons (filter (fn [b] (= mark (get-text b)))) first click))))
 
