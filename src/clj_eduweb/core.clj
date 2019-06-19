@@ -1,6 +1,7 @@
 (ns clj-eduweb.core
   "Wrapper over Selenium API and other general-purpose stuff"
   (:import
+    ; selenium
     (org.openqa.selenium.chrome 
       ChromeDriver 
       ChromeOptions) 
@@ -14,7 +15,13 @@
       FluentWait
       ExpectedCondition
       ExpectedConditions)
-    java.time.Duration
+
+    ; java.time
+    (java.time LocalDate
+               Duration)
+    (java.time.format DateTimeFormatter)
+    
+    ; java.util
     java.util.concurrent.TimeUnit
     java.util.UUID)
   (:require [clojure.string :as cstr]
@@ -215,6 +222,16 @@
 
 (defn uuid []
   (str (UUID/randomUUID)))
+
+(defn date-strings
+   "Generate sequence of date strings starting from given date (now by default),
+   with provided step interval, and formatting by given pattern (dd.MM.yy by default)"
+   [step & {:keys [date
+                   format-pattern]
+            :or {date (LocalDate/now)
+                 format-pattern "dd.MM.yy"}}]
+   (map (fn [d] (.format d (DateTimeFormatter/ofPattern format-pattern)))
+        (iterate (fn [d] (.plusDays d step)) date)))
 
 (defn set-css-property
   "Set given css property of element.
