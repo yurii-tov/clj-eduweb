@@ -67,6 +67,11 @@
 
 (defn get-windows [] (find-elements (css ".x-window")))
 
+(def get-window
+  "Shorthand for (first (get-windows)).
+  Useful if there is only one window"
+  (comp first get-windows))
+
 (defn close-window [window]
   (click (find-element window (css ".x-tool-close")))
   (wait-for-stale window))
