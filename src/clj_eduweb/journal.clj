@@ -128,14 +128,18 @@
     (edit-mark cell
       (fn [w] (click (first (filter pressed? (get-buttons w))))))))
 
-(defn set-random-mark [cell & marks-to-exclude]
+(defn set-random-mark
+  "Fill given cell with random mark"
+  [cell & marks-to-exclude]
   (edit-mark cell
     (fn [w] 
       (let [not-excluded? (comp (complement (set marks-to-exclude)) get-text)
             buttons (filter (every-pred not-excluded? displayed?) (get-buttons w))]
         (click (rand-nth buttons))))))
 
-(defn set-random-marks [& marks-to-exclude]
+(defn set-random-marks
+  "Fill all existing cells on page with random marks"
+  [& marks-to-exclude]
   (foreach-element [cell (get-cells)]
     (and (> (rand-int 10) 0)
       (apply set-random-mark cell marks-to-exclude))))
