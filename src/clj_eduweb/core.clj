@@ -44,7 +44,7 @@
      ~@body))
 
 (defn config-webdriver 
-  "Set WebDriver-specific options.
+  "Configure webdriver instance.
    Recognized options:
    :implicit-wait  (implicit wait in seconds)"
   [driver {:keys [implicit-wait]
@@ -60,14 +60,15 @@
    Args:
    options
    Recognized keys: 
-   :browser   ; [keyword]           browser type
-   :args      ; [vector of strings] driver cli arguments
-   :prefs     ; [map]               'preferences' experimental option
-   :headless? ; [boolean]           on/off headless mode"
+   :browser      ; [keyword]           browser type
+   :args         ; [vector of strings] cli switches
+   :prefs        ; [map]               'preferences' experimental option
+   :capabilities ; [map]               common webdriver settings
+   :headless?    ; [boolean]           on/off headless mode"
   :browser)
 
 (defmethod start-driver :chrome
-  [{:keys [args prefs headless?]
+  [{:keys [args prefs capabilities headless?]
     :as options}]
   (let [chrome-options (new ChromeOptions)]
     (when headless? (. chrome-options setHeadless headless?))
@@ -75,6 +76,8 @@
       (. chrome-options addArguments args))
     (when prefs
       (. chrome-options setExperimentalOption "prefs" prefs))
+    (doseq [[k v] capabilities]
+      (. chrome-options setCapability k v))
     (let [chromedriver (new ChromeDriver chrome-options)]
       (config-webdriver chromedriver options)
       (init-driver chromedriver))))
