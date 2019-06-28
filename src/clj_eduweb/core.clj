@@ -61,6 +61,7 @@
    options
    Recognized keys: 
    :browser      ; [keyword]           browser type
+   :start-url    ; [string]            optional url to navigate on start
    :args         ; [vector of strings] cli switches
    :prefs        ; [map]               'preferences' experimental option
    :capabilities ; [map]               common webdriver settings
@@ -68,7 +69,7 @@
   :browser)
 
 (defmethod start-driver :chrome
-  [{:keys [args prefs capabilities headless?]
+  [{:keys [args prefs capabilities headless? start-url]
     :as options}]
   (let [chrome-options (new ChromeOptions)]
     (when headless? (. chrome-options setHeadless headless?))
@@ -80,6 +81,8 @@
       (. chrome-options setCapability k v))
     (let [chromedriver (new ChromeDriver chrome-options)]
       (config-webdriver chromedriver options)
+      (when start-url
+        (.get chromedriver start-url))
       (init-driver chromedriver))))
 
 (defn start-chromedriver 
