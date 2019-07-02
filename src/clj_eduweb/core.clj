@@ -43,7 +43,7 @@
   `(binding [*driver* ~driver]
      ~@body))
 
-(defn config-webdriver 
+(defn config-driver 
   "Configure webdriver instance.
    Recognized options:
    :implicit-wait  (implicit wait in seconds)"
@@ -79,7 +79,7 @@
     (doseq [[k v] capabilities]
       (. chrome-options setCapability k v))
     (let [chromedriver (new ChromeDriver chrome-options)]
-      (config-webdriver chromedriver options)
+      (config-driver chromedriver options)
       (when start-url
         (.get chromedriver start-url))
       (set-driver! chromedriver))))
