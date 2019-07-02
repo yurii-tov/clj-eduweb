@@ -100,7 +100,9 @@
 
 ;; navigation
 
-(defn get-url [url]
+(defn get-url
+  "Navigate browser to given url"
+  [url]
   (.get *driver* url))
 
 (defmacro open-popup
