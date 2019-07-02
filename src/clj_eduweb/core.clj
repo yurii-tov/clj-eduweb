@@ -30,12 +30,14 @@
 
 ;; driver management
 
+(def ^:dynamic *driver*)
+
 (defn set-driver! 
-  "Initialize *driver* dynamic variable unconditionally.
+  "Mutate *driver* dynamic variable.
   Return its argument"
   [driver]
-  (def ^:dynamic *driver* driver)
-  driver)
+  (alter-var-root (var *driver*)
+    (constantly driver)))
 
 (defmacro with-driver 
   "Perform body with *driver* variable bound to driver"
