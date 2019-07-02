@@ -30,11 +30,11 @@
 
 ;; driver management
 
-(defn init-driver 
-  "Initialize *driver* dynamic variable, if not yet initialized.
-  Return its argument (driver)"
+(defn set-driver! 
+  "Initialize *driver* dynamic variable unconditionally.
+  Return its argument"
   [driver]
-  (defonce ^:dynamic *driver* driver)
+  (def ^:dynamic *driver* driver)
   driver)
 
 (defmacro with-driver 
@@ -56,9 +56,8 @@
       (implicitlyWait implicit-wait TimeUnit/SECONDS))))
 
 (defmulti start-driver 
-  "Configure and start new webdriver instance, set *driver* dynamic var
-   Args:
-   options
+  "Configure and start new webdriver instance, mutate *driver* dynamic var (see set-driver!)
+   Args: hashmap
    Recognized keys: 
    :browser      ; [keyword]           browser type
    :start-url    ; [string]            optional url to navigate on start
@@ -83,7 +82,7 @@
       (config-webdriver chromedriver options)
       (when start-url
         (.get chromedriver start-url))
-      (init-driver chromedriver))))
+      (set-driver! chromedriver))))
 
 (defn start-chromedriver 
   "Start chromedriver with predefined list of options;
