@@ -122,16 +122,29 @@
 
 (defn select-combobox 
   "Select an option in given combobox.
-  If keyword :random provided, select random option"
-  [combobox option]
-  (let [options-list (get-combo-listitems (expand-combobox combobox))]
-    (click (if (= option :random)
+  If keyword :random provided, select random option
+  Arguments:
+    - combobox (web element)
+    - option-spec (value to search element in list of options)
+    Option-spec may be:
+      String
+      java.util.regex.Pattern"
+  [combobox option-spec]
+  (let [options-list (get-combo-listitems (expand-combobox combobox))
+        predicate (cond (string? option-spec)
+                        (fn [o] (= (get-text o) option-spec))
+                        (= java.util.regex.Pattern
+                           (type option-spec))
+                        (fn [o] (re-matches option-spec
+                                            (get-text o)))
+                        :else (throw (new IllegalArgumentException
+                                       (format "Wrong option spec: %s. It should be a string, or a pattern" 
+                                               option-spec))))]
+    (click (if (= option-spec :random)
              (rand-nth options-list)
-             (or (first (filter 
-                          (fn [o] (= (get-text o) option)) 
-                          options-list))
+             (or (first (filter predicate options-list))
                  (throw (new IllegalStateException
-                          (str "option not found: " option 
+                          (str "option not found: " option-spec 
                             "; avalilable options is: "
                             (mapv get-text options-list)))))))))
 
