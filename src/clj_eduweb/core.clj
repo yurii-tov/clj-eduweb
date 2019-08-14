@@ -74,6 +74,12 @@
   [{:keys [args prefs capabilities headless? start-url binary]
     :as options}]
   (let [chrome-options (new ChromeOptions)]
+    ; hacks to hide infobars
+  	(. chrome-options
+  	  setExperimentalOption "useAutomationExtension" false)
+  	(. chrome-options
+  	  setExperimentalOption "excludeSwitches" ["enable-automation"])
+  	; misc options
     (when binary
       (. chrome-options setBinary binary))
     (when headless? (. chrome-options setHeadless headless?))
@@ -88,17 +94,6 @@
       (when start-url
         (.get chromedriver start-url))
       (set-driver! chromedriver))))
-
-(defn start-chromedriver 
-  "Start chromedriver with predefined list of options;
-  Also support keyword arguments for custom options
-  (see (doc start-driver) for available keys)"
-  [& {:keys [args] :as options}]
-  (let [predefined-args ["disable-infobars"]]
-    (start-driver 
-      (merge options
-        {:browser :chrome
-  	     :args    (into predefined-args args)}))))
 
 (defn quit-driver []
   (.quit *driver*))
