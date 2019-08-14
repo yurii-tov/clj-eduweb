@@ -66,13 +66,16 @@
    :args         ; [vector of strings] cli switches
    :prefs        ; [map]               'preferences' experimental option
    :capabilities ; [map]               common webdriver settings
-   :headless?    ; [boolean]           on/off headless mode"
+   :headless?    ; [boolean]           on/off headless mode
+   :binary       ; [string]            path to browser executable"
   :browser)
 
 (defmethod start-driver :chrome
-  [{:keys [args prefs capabilities headless? start-url]
+  [{:keys [args prefs capabilities headless? start-url binary]
     :as options}]
   (let [chrome-options (new ChromeOptions)]
+    (when binary
+      (. chrome-options setBinary binary))
     (when headless? (. chrome-options setHeadless headless?))
     (when (seq args)
       (. chrome-options addArguments args))
