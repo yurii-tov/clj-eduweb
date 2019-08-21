@@ -4,5 +4,4 @@
            org.clojure/clojure
            {:mvn/version "1.10.0"}}
     :paths ["src"]
-    :aliases {:dev {:extra-paths ["dev"]}}
 }
