@@ -2,4 +2,4 @@
   :description "ui automation for 1c:education"
   :dependencies [[org.clojure/clojure "1.10.0"]
                  [org.seleniumhq.selenium/selenium-java "3.141.59"]]
-  :repl-options {:init-ns clj-eduweb.core})
+  :repl-options {:init-ns clj-eduweb.repl})
