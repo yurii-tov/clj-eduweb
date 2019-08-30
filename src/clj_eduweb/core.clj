@@ -62,7 +62,7 @@
    Args: hashmap
    Recognized keys: 
    :browser      ; [keyword]           browser type
-   :start-url    ; [string]            optional url to navigate on start
+   :url          ; [string]            optional url to navigate on start
    :args         ; [vector of strings] cli switches
    :prefs        ; [map]               'preferences' experimental option
    :capabilities ; [map]               common webdriver settings
@@ -71,7 +71,7 @@
   :browser)
 
 (defmethod start-driver :chrome
-  [{:keys [args prefs capabilities headless? start-url binary]
+  [{:keys [args prefs capabilities headless? url binary]
     :as options}]
   (let [chrome-options (new ChromeOptions)]
     ; hacks to hide infobars
@@ -91,8 +91,8 @@
       (. chrome-options setCapability k v))
     (let [chromedriver (new ChromeDriver chrome-options)]
       (config-driver chromedriver options)
-      (when start-url
-        (.get chromedriver start-url))
+      (when url
+        (.get chromedriver url))
       (set-driver! chromedriver))))
 
 (defn quit-driver []
