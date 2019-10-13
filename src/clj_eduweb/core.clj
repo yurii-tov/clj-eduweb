@@ -228,15 +228,18 @@
 (defn uuid []
   (str (UUID/randomUUID)))
 
-(defn date-strings
-   "Generate sequence of date strings starting from given date (now by default),
-   with provided step interval, and formatting by given pattern (dd.MM.yy by default)"
-   [step & {:keys [date
-                   format-pattern]
-            :or {date (LocalDate/now)
-                 format-pattern "dd.MM.yy"}}]
-   (map (fn [d] (.format d (DateTimeFormatter/ofPattern format-pattern)))
-        (iterate (fn [d] (.plusDays d step)) date)))
+(defn mk-date-gen
+  "Create generator function which generate LocalDate objects
+  Parameters:
+  step - interval between dates (in days)
+  start - Starting element of a sequence, LocalDate object. By default, current day"
+  ([{:keys [step start]
+     :or {step 1
+          start (LocalDate/now)}}]
+   (let [s (atom (.minusDays start step))
+         inc-days (fn [d] (.plusDays d step))]
+     (fn [] (swap! s inc-days))))
+  ([] (mk-date-gen {})))
 
 (defn set-css-property
   "Set given css property of element.
