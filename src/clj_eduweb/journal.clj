@@ -1,7 +1,11 @@
 (ns clj-eduweb.journal
+  (:import java.time.LocalDate
+           java.time.format.DateTimeFormatter)
   (:require [clj-eduweb.core :refer :all]
             [clj-eduweb.elements :refer :all]
             [clojure.string :as cstr]))
+
+(def ^:dynamic *date-format* "dd.MM.yy")
 
 ; tasks
 
@@ -20,7 +24,7 @@
    ; -------------
   {:title \"task title\" ; :random by default
    :control-work? false  ; check \"control work\" checkbox?
-   :date \"15.07.19\"    ; date of task
+   :date \"15.07.19\"    ; date of task: may be string or LocalDate object
    ; ----------------
    ; advanced options
    ; ----------------
@@ -50,7 +54,10 @@
         (first (get-checkboxes window)) 
         control-work?))
      (when date
-       (send-keys (first (get-inputs window)) date))
+       (let [date (cond (instance? LocalDate date)
+                        (.format date (DateTimeFormatter/ofPattern *date-format*))
+                        :else date)]
+         (send-keys (first (get-inputs window)) date)))
      (when (or lesson-type activity scale)
        (click (last buttons))
        (let [[lesson-type-combo
