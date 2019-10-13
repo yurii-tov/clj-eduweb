@@ -75,6 +75,25 @@
      (wait-for (condition (> (count (get-tasks)) 
                              tasks-count))))))
 
+(defn add-tasks
+  "Create a bunch of tasks.
+  Parameters:
+  Hashmap, same as for add-task, but with some additions.
+  :count - number of tasks to add
+  :date  - string, LocalDate or generator function. See mk-date-gen in clj-eduweb.core namespace
+  :step  - interval between dates. ignored if :date is specified"
+  [{:keys [date count step]
+    :as args
+    :or {step 1}}]
+  (let [gen-date (if date
+                   (if (fn? date) date (constantly date))
+                   (mk-date-gen {:step step}))
+        gen-task-data (fn [] (assoc args :date (gen-date)))]
+    (->> (repeatedly gen-task-data)
+         (take count)
+         (map add-task)
+         dorun)))
+  
 ; total marks
 
 (defn add-total-mark
