@@ -30,43 +30,43 @@
    }"
   ([] (add-task {}))
   ([{:keys [title
-  	        control-work?
+            control-work?
             date
             lesson-type
             activity
             scale]
-  	 :or {title :random}}]
-    (click (find-element (css "#e4-journal-TaskList-addTaskButton button")))
-    (let [tasks-count (count (get-tasks))
-          [window] (get-windows)
-          [button :as buttons] (get-buttons window)
-          [_ title-input] (get-inputs window)]
-      (send-keys title-input 
-        (if (= title :random)
-          (gen-taskname)
-          title))
-      (when control-work?
-        (set-checkbox 
-          (first (get-checkboxes window)) 
-          control-work?))
-      (when date
-        (send-keys (first (get-inputs window)) date))
-      (when (or lesson-type activity scale)
-        (click (last buttons))
-        (let [[lesson-type-combo
-               activity-combo
-               scale-combo] (get-comboboxes window)]
-          (dorun (map (fn [combo value] 
-                        (when value (select-combobox combo value))) 
-                      [lesson-type-combo activity-combo]
-                      [lesson-type activity]))
-          (when scale
-            (set-checkbox (last (get-checkboxes window)) true)
-            (select-combobox scale-combo scale))))
-      (click button)
-      (wait-for-stale window)
-      (wait-for (condition (> (count (get-tasks)) 
-                              tasks-count))))))
+     :or {title :random}}]
+   (click (find-element (css "#e4-journal-TaskList-addTaskButton button")))
+   (let [tasks-count (count (get-tasks))
+         [window] (get-windows)
+         [button :as buttons] (get-buttons window)
+         [_ title-input] (get-inputs window)]
+     (send-keys title-input 
+                (if (= title :random)
+                  (gen-taskname)
+                  title))
+     (when control-work?
+       (set-checkbox 
+        (first (get-checkboxes window)) 
+        control-work?))
+     (when date
+       (send-keys (first (get-inputs window)) date))
+     (when (or lesson-type activity scale)
+       (click (last buttons))
+       (let [[lesson-type-combo
+              activity-combo
+              scale-combo] (get-comboboxes window)]
+         (dorun (map (fn [combo value] 
+                       (when value (select-combobox combo value))) 
+                     [lesson-type-combo activity-combo]
+                     [lesson-type activity]))
+         (when scale
+           (set-checkbox (last (get-checkboxes window)) true)
+           (select-combobox scale-combo scale))))
+     (click button)
+     (wait-for-stale window)
+     (wait-for (condition (> (count (get-tasks)) 
+                             tasks-count))))))
 
 ; total marks
 
@@ -76,7 +76,7 @@
   [mark]
   (let [valid-options '(:period :year :exam :total)]
     (assert (some #{mark} valid-options)
-      (str "valid options are: " valid-options))
+            (str "valid options are: " valid-options))
     (click (find-element (css "#e4-journal-TaskList-addTaskButton .x-btn-mr")))
     (click (first (get-context-menu-options (first (get-context-menus)))))
     (let [[window] (get-windows)
@@ -94,7 +94,7 @@
   (let [cells (get-cells)
         get-col-num (fn [c] 
                       (second (re-find #"x-grid3-td-markColumn(\d+)" 
-                                (get-attribute c "class"))))
+                                       (get-attribute c "class"))))
         col-count (count (set (map get-col-num cells)))]
     (apply map vector (partition col-count cells))))
 
@@ -118,28 +118,33 @@
   "Set specific mark to given cell. 
   For randomness use set-random-mark or set-random-marks functions"
   [cell mark]
-  (edit-mark cell 
-    (fn [w] (->> w get-buttons (filter (fn [b] (= mark (get-text b)))) first click))))
+  (edit-mark
+   cell 
+   (fn [w]
+     (->> w
+          get-buttons
+          (filter (fn [b] (= mark (get-text b))))
+          first click))))
 
 (defn clear-mark [cell]
   (when (or (seq (get-text cell)) 
             (cstr/includes? (get-attribute cell "class") 
                             "to-survey"))
     (edit-mark cell
-      (fn [w] (click (first (filter pressed? (get-buttons w))))))))
+               (fn [w] (click (first (filter pressed? (get-buttons w))))))))
 
 (defn set-random-mark
   "Fill given cell with random mark"
   [cell & marks-to-exclude]
   (edit-mark cell
-    (fn [w] 
-      (let [not-excluded? (comp (complement (set marks-to-exclude)) get-text)
-            buttons (filter (every-pred not-excluded? displayed?) (get-buttons w))]
-        (click (rand-nth buttons))))))
+             (fn [w] 
+               (let [not-excluded? (comp (complement (set marks-to-exclude)) get-text)
+                     buttons (filter (every-pred not-excluded? displayed?) (get-buttons w))]
+                 (click (rand-nth buttons))))))
 
 (defn set-random-marks
   "Fill all existing cells on page with random marks"
   [& marks-to-exclude]
   (foreach-element [cell (get-cells)]
-    (and (> (rand-int 10) 0)
-      (apply set-random-mark cell marks-to-exclude))))
+                   (and (> (rand-int 10) 0)
+                        (apply set-random-mark cell marks-to-exclude))))
