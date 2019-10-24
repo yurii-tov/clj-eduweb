@@ -4,7 +4,10 @@
     ; selenium
     (org.openqa.selenium.chrome 
       ChromeDriver 
-      ChromeOptions) 
+      ChromeOptions)
+    (org.openqa.selenium.firefox
+     FirefoxOptions
+     FirefoxDriver)
     (org.openqa.selenium 
      WebElement 
      By 
@@ -94,6 +97,17 @@
       (when url
         (.get chromedriver url))
       (set-driver! chromedriver))))
+
+(defmethod start-driver :firefox
+  [{:keys [url]
+    :as options}]
+  (let [firefox-options (new FirefoxOptions)]
+    (.setCapability firefox-options "marionette" false)
+    (let [firefox-driver (new FirefoxDriver firefox-options)]
+      (config-driver firefox-driver options)
+      (when url
+        (.get firefox-driver url))
+      (set-driver! firefox-driver))))
 
 (defn quit-driver []
   (.quit *driver*))
