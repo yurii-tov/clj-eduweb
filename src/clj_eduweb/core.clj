@@ -78,11 +78,11 @@
     :as options}]
   (let [chrome-options (new ChromeOptions)]
     ; hacks to hide infobars
-  	(. chrome-options
-  	  setExperimentalOption "useAutomationExtension" false)
-  	(. chrome-options
-  	  setExperimentalOption "excludeSwitches" ["enable-automation"])
-  	; misc options
+    (. chrome-options
+       setExperimentalOption "useAutomationExtension" false)
+    (. chrome-options
+       setExperimentalOption "excludeSwitches" ["enable-automation"])
+    ; misc options
     (when binary
       (. chrome-options setBinary binary))
     (when headless? (. chrome-options setHeadless headless?))
