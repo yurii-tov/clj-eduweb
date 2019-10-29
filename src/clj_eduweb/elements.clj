@@ -8,16 +8,16 @@
 (defn get-inputs
   ([context] 
    (find-elements context 
-     (css "input[type=text], input[type=password]")))
+     :css "input[type=text], input[type=password]"))
   ([] (get-inputs *driver*)))
 
 ;; tables
 
 (defn get-tables
   ([] (get-tables *driver*))
-  ([context] (find-elements context (css "table"))))
+  ([context] (find-elements context :css "table")))
 
-(defn table-rows [table] (find-elements table (css "tr")))
+(defn table-rows [table] (find-elements table :css "tr"))
 
 (defn table-column 
   "table => either <table> element or list of <tr>
@@ -27,20 +27,20 @@
                table 
                (table-rows table))]
     (->> rows 
-      (map (fn [r] (nth (find-elements r (css "td")) i))) 
+      (map (fn [r] (nth (find-elements r :css "td") i))) 
       (map (fn [t] (let [text (get-text t)] 
              (when-not (empty? text) text)))))))
 
 ;; radio buttons
 
 (defn get-radio-buttons 
-  ([context] (find-elements context (css "input[type=radio]")))
+  ([context] (find-elements context :css "input[type=radio]"))
   ([] (get-radio-buttons *driver*)))
 
 ;; checkboxes
 
 (defn get-checkboxes
-  ([context] (find-elements context (css "input[type=checkbox]")))
+  ([context] (find-elements context :css "input[type=checkbox]"))
   ([] (get-checkboxes *driver*)))
 
 (defn set-checkbox
@@ -57,7 +57,7 @@
 ;; buttons
 
 (defn get-buttons 
-  ([context] (find-elements context (css "button")))
+  ([context] (find-elements context :css "button"))
   ([] (get-buttons *driver*)))
 
 (defn pressed? [button]
@@ -65,7 +65,7 @@
 
 ;; dialog windows
 
-(defn get-windows [] (find-elements (css ".x-window")))
+(defn get-windows [] (find-elements :css ".x-window"))
 
 (def get-window
   "Shorthand for (first (get-windows)).
@@ -73,42 +73,42 @@
   (comp first get-windows))
 
 (defn close-window [window]
-  (click (find-element window (css ".x-tool-close")))
+  (click (find-element window :css ".x-tool-close"))
   (wait-for-stale window))
 
 ;; context menu
 
 (defn get-context-menus []
-  (find-elements (css ".x-menu")))
+  (find-elements :css ".x-menu"))
 
 (defn get-context-menu-options 
   ([context]
-    (map (fn [x] (find-element x (css "span")))
+    (map (fn [x] (find-element x :css "span"))
       (remove (fn [x] (cstr/includes? (get-attribute x "class") "x-menu-sep-li"))
-        (find-elements context (css ".x-menu-list-item")))))
+        (find-elements context :css ".x-menu-list-item"))))
   ([] (get-context-menu-options *driver*)))
 
 ;; comboboxes
 
 (defn get-combo-lists
-  ([context] (find-elements context (css ".x-combo-list-inner")))
+  ([context] (find-elements context :css ".x-combo-list-inner"))
   ([] (get-combo-lists *driver*)))
 
 (defn get-combo-listitems
   "Get list items (as web elements) from given context"
-  ([context] (find-elements context (css "[role=listitem]")))
+  ([context] (find-elements context :css "[role=listitem]"))
   ([] (get-combo-listitems *driver*)))
 
 (defn get-comboboxes
   ([] (get-comboboxes *driver*))
-  ([context] (find-elements context (css "[role=combobox]"))))
+  ([context] (find-elements context :css "[role=combobox]")))
 
 (defn expand-combobox
   "Expand given combobox, ensure there is only one combo-list appeared.
    Returns combo-list"
   [combobox]
   (with-retry
-    (click (find-element combobox (css "img.x-form-trigger-arrow")))
+    (click (find-element combobox :css "img.x-form-trigger-arrow"))
     (wait-for (condition (let [combo-lists (get-combo-lists)]
                            (and (= 1 (count combo-lists))
                                 (first combo-lists)))))))
@@ -117,7 +117,7 @@
   [combobox]
   (let [[combo-list] (get-combo-lists)]
     (when combo-list
-      (click (find-element combobox (css "img.x-form-trigger-arrow")))
+      (click (find-element combobox :css "img.x-form-trigger-arrow"))
       (wait-for-stale combo-list))))
 
 (defn select-combobox 

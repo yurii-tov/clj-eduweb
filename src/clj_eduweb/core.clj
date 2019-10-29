@@ -148,21 +148,39 @@
 
 ;; find elements
 
-(defn css [selector]
+(defmulti make-selector
+  "Create new 'By' object based on selector-type keyword"
+  (fn [selector-type _] selector-type))
+
+(defmethod make-selector :css
+  [_ selector]
   (By/cssSelector selector))
 
-(defn xpath [selector]
+(defmethod make-selector :xpath
+  [_ selector]
   (By/xpath selector))
 
-(defn find-elements
-  ([context selector]
-    (vec (. context findElements selector)))
-  ([selector] (find-elements *driver* selector)))
-
 (defn find-element
-  ([context selector]
-    (. context findElement selector))
-  ([selector] (find-element *driver* selector)))
+  "Wrapper over Selenium's findElement method.
+  Example usage: (find-element :css \"a.stylish\")
+                 (find-element other-element :css \"a.stylish\")"
+  ([context selector-type selector]
+   (. context
+      findElement
+      (make-selector selector-type selector)))
+  ([selector-type selector]
+   (find-element *driver* selector-type selector)))
+
+(defn find-elements
+  "Wrapper over Selenium's findElements method.
+  Example usage: (find-elements :css \"a.stylish\")
+                 (find-elements other-element :css \"a.stylish\")"
+  ([context selector-type selector]
+   (vec (. context
+           findElements
+           (make-selector selector-type selector)))
+   ([selector-type selector]
+    (find-elements *driver* selector-type selector)))
 
 ;; perform actions on elements
 
@@ -258,7 +276,7 @@
 (defn set-css-property
   "Set given css property of element.
   Example:
-  (set-css-property (find-element (css \"button\"))
+  (set-css-property (find-element :css \"button\")
                     \"background-color\"
                     \"green\")"
   [el prop value]

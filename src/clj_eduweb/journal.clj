@@ -10,7 +10,7 @@
 ; tasks
 
 (defn get-tasks [] 
-  (find-elements (css ".x-grid3-col-theme")))
+  (find-elements :css ".x-grid3-col-theme"))
 
 (defn gen-taskname []
   (apply str (take 8 (uuid))))
@@ -40,7 +40,7 @@
             activity
             scale]
      :or {title :random}}]
-   (click (find-element (css "#e4-journal-TaskList-addTaskButton button")))
+   (click (find-element :css "#e4-journal-TaskList-addTaskButton button"))
    (let [tasks-count (count (get-tasks))
          [window] (get-windows)
          [button :as buttons] (get-buttons window)
@@ -103,7 +103,7 @@
   (let [valid-options '(:period :year :exam :total)]
     (assert (some #{mark} valid-options)
             (str "valid options are: " valid-options))
-    (click (find-element (css "#e4-journal-TaskList-addTaskButton .x-btn-mr")))
+    (click (find-element :css "#e4-journal-TaskList-addTaskButton .x-btn-mr"))
     (click (first (get-context-menu-options (first (get-context-menus)))))
     (let [[window] (get-windows)
           options (get-radio-buttons window)
@@ -114,7 +114,7 @@
 
 ; cells
 
-(defn get-cells [] (find-elements *driver* (css "td.mark-cell")))
+(defn get-cells [] (find-elements *driver* :css "td.mark-cell"))
 
 (defn get-columns []
   (let [cells (get-cells)
