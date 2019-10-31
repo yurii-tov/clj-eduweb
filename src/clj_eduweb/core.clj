@@ -180,7 +180,7 @@
            findElements
            (make-selector selector-type selector)))
    ([selector-type selector]
-    (find-elements *driver* selector-type selector)))
+    (find-elements *driver* selector-type selector))))
 
 ;; perform actions on elements
 
