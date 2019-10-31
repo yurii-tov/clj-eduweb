@@ -178,9 +178,9 @@
   ([context selector-type selector]
    (vec (. context
            findElements
-           (make-selector selector-type selector)))
-   ([selector-type selector]
-    (find-elements *driver* selector-type selector))))
+           (make-selector selector-type selector))))
+  ([selector-type selector]
+    (find-elements *driver* selector-type selector)))
 
 ;; perform actions on elements
 
