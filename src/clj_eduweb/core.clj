@@ -182,6 +182,18 @@
   ([selector-type selector]
     (find-elements *driver* selector-type selector)))
 
+;; frames navigation
+
+(defn switch-to-frame
+  "Switch to frame presented as WebElement"
+  [el]
+  (.. *driver* switchTo (frame el)))
+
+(defn switch-to-parent-context
+  "Navigate one nesting level up from current frame"
+  []
+  (.. *driver* switchTo parentFrame))
+
 ;; perform actions on elements
 
 (defn click [el] (. el click))
