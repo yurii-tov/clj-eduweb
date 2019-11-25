@@ -33,7 +33,7 @@
 
 ;; driver management
 
-(defonce ^:dynamic *driver*)
+(def ^:dynamic *driver*)
 
 (defn set-driver! 
   "Mutate *driver* dynamic variable.
