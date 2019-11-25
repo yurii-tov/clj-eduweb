@@ -164,6 +164,24 @@
     (. context findElement selector))
   ([selector] (find-element *driver* selector)))
 
+;; frames navigation
+
+(defn switch-to-frame
+  "Switch to frame presented as WebElement"
+  [el]
+  (.. *driver* switchTo (frame el)))
+
+(defn switch-to-parent-context
+  "Navigate one nesting level up from current frame"
+  []
+  (.. *driver* switchTo parentFrame))
+
+(defmacro with-frame
+  "Perform actions in a context of frame, then go back to parent context, in despite of any errors"
+  [frame & body]
+  `(do (switch-to-frame ~frame)
+       (try ~@body (finally (switch-to-parent-context)))))
+
 ;; perform actions on elements
 
 (defn click [el] (. el click))
