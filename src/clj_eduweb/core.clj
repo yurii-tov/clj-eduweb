@@ -194,6 +194,12 @@
   []
   (.. *driver* switchTo parentFrame))
 
+(defmacro with-frame
+  "Perform actions in a context of frame, then go back to parent context, in despite of any errors"
+  [frame & body]
+  `(do (switch-to-frame ~frame)
+       (try ~@body (finally (switch-to-parent-context)))))
+
 ;; perform actions on elements
 
 (defn click [el] (. el click))
