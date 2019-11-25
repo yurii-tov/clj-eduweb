@@ -148,57 +148,21 @@
 
 ;; find elements
 
-(defmulti make-selector
-  "Create new 'By' object based on selector-type keyword"
-  (fn [selector-type _] selector-type))
-
-(defmethod make-selector :css
-  [_ selector]
+(defn css [selector]
   (By/cssSelector selector))
 
-(defmethod make-selector :xpath
-  [_ selector]
+(defn xpath [selector]
   (By/xpath selector))
 
-(defn find-element
-  "Wrapper over Selenium's findElement method.
-  Example usage: (find-element :css \"a.stylish\")
-                 (find-element other-element :css \"a.stylish\")"
-  ([context selector-type selector]
-   (. context
-      findElement
-      (make-selector selector-type selector)))
-  ([selector-type selector]
-   (find-element *driver* selector-type selector)))
-
 (defn find-elements
-  "Wrapper over Selenium's findElements method.
-  Example usage: (find-elements :css \"a.stylish\")
-                 (find-elements other-element :css \"a.stylish\")"
-  ([context selector-type selector]
-   (vec (. context
-           findElements
-           (make-selector selector-type selector))))
-  ([selector-type selector]
-    (find-elements *driver* selector-type selector)))
+  ([context selector]
+    (vec (. context findElements selector)))
+  ([selector] (find-elements *driver* selector)))
 
-;; frames navigation
-
-(defn switch-to-frame
-  "Switch to frame presented as WebElement"
-  [el]
-  (.. *driver* switchTo (frame el)))
-
-(defn switch-to-parent-context
-  "Navigate one nesting level up from current frame"
-  []
-  (.. *driver* switchTo parentFrame))
-
-(defmacro with-frame
-  "Perform actions in a context of frame, then go back to parent context, in despite of any errors"
-  [frame & body]
-  `(do (switch-to-frame ~frame)
-       (try ~@body (finally (switch-to-parent-context)))))
+(defn find-element
+  ([context selector]
+    (. context findElement selector))
+  ([selector] (find-element *driver* selector)))
 
 ;; perform actions on elements
 
@@ -294,7 +258,7 @@
 (defn set-css-property
   "Set given css property of element.
   Example:
-  (set-css-property (find-element :css \"button\")
+  (set-css-property (find-element (css \"button\"))
                     \"background-color\"
                     \"green\")"
   [el prop value]

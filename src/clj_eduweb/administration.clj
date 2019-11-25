@@ -13,7 +13,7 @@
   :group
   :teacher"
   [{:keys [period subject group teacher]}]
-  (click (find-element :css "#e4-administration-menutree-journallist-addItem button"))
+  (click (find-element (css "#e4-administration-menutree-journallist-addItem button")))
   (let [[window] (get-windows)]
     (dorun (map (fn [combo value]
                   (when value 
