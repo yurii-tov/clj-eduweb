@@ -84,10 +84,15 @@
   :step  - interval between dates. ignored if :date is specified"
   [{:keys [date count step]
     :as args
-    :or {step 1}}]
-  (let [gen-date (if date
-                   (if (fn? date) date (constantly date))
-                   (mk-date-gen {:step step}))
+    :or {step 1 date (LocalDate/now)}}]
+  (let [parse-date (fn [s] (LocalDate/parse s (DateTimeFormatter/ofPattern *date-format*)))
+        gen-date (if (fn? date)
+                   date
+                   (mk-date-gen
+                    {:step step
+                     :start (if (string? date)
+                              (parse-date date)
+                              date)}))
         gen-task-data (fn [] (assoc args :date (gen-date)))]
     (->> (repeatedly gen-task-data)
          (take count)
