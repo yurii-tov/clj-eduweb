@@ -7,6 +7,20 @@
 
 (def ^:dynamic *date-format* "dd.MM.yy")
 
+(declare parse-date format-date)
+
+; page info
+
+(defn get-page-period
+  "Get period of current journal page as vector of LocalDate objects, i.e. [start end]"
+  []
+  (let [text (get-text (find-element (css ".x-panel-header .x-box-item")))
+        match (re-find #"\(([0-9.]+).+?([0-9.]+)\)" text)]
+    (if match
+      (let [[_ & result] match]
+        (mapv parse-date result))
+      (throw (new IllegalStateException "Unable to parse period from %s" text)))))
+
 ; tasks
 
 (defn get-tasks [] 
@@ -55,7 +69,7 @@
         control-work?))
      (when date
        (let [date (cond (instance? LocalDate date)
-                        (.format date (DateTimeFormatter/ofPattern *date-format*))
+                        (format-date date)
                         :else date)]
          (send-keys (first (get-inputs window)) date)))
      (when (or lesson-type activity scale)
@@ -84,9 +98,8 @@
   :step  - interval between dates. ignored if :date is specified"
   [{:keys [date count step]
     :as args
-    :or {step 1 date (LocalDate/now)}}]
-  (let [parse-date (fn [s] (LocalDate/parse s (DateTimeFormatter/ofPattern *date-format*)))
-        gen-date (if (fn? date)
+    :or {step 1 date (first (get-page-period))}}]
+  (let [gen-date (if (fn? date)
                    date
                    (mk-date-gen
                     {:step step
@@ -179,3 +192,11 @@
   (foreach-element [cell (get-cells)]
                    (and (> (rand-int 10) 0)
                         (apply set-random-mark cell marks-to-exclude))))
+
+;; utils
+
+(defn parse-date [s]
+  (LocalDate/parse s (DateTimeFormatter/ofPattern *date-format*)))
+
+(defn format-date [date]
+  (.format date (DateTimeFormatter/ofPattern *date-format*)))
