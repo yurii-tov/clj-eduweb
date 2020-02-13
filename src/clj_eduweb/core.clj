@@ -1,30 +1,30 @@
 (ns clj-eduweb.core
   "Wrapper over Selenium API and other general-purpose stuff"
   (:import
-    (org.openqa.selenium.chrome 
-      ChromeDriver 
-      ChromeOptions)
-    (org.openqa.selenium.firefox
-     FirefoxOptions
-     FirefoxDriver)
-    (org.openqa.selenium 
-     WebElement 
-     By 
-     OutputType 
-     StaleElementReferenceException)
-    org.openqa.selenium.remote.RemoteWebDriver
-    org.openqa.selenium.interactions.Actions 
-    (org.openqa.selenium.support.ui 
-      FluentWait
-      ExpectedCondition
-      ExpectedConditions)
+   (org.openqa.selenium.chrome
+    ChromeDriver
+    ChromeOptions)
+   (org.openqa.selenium.firefox
+    FirefoxOptions
+    FirefoxDriver)
+   (org.openqa.selenium
+    WebElement
+    By
+    OutputType
+    StaleElementReferenceException)
+   org.openqa.selenium.remote.RemoteWebDriver
+   org.openqa.selenium.interactions.Actions
+   (org.openqa.selenium.support.ui
+    FluentWait
+    ExpectedCondition
+    ExpectedConditions)
 
-    (java.time LocalDate
-               Duration)
-    (java.time.format DateTimeFormatter)
-    java.util.concurrent.TimeUnit
-    java.util.UUID
-    java.net.URL)
+   (java.time LocalDate
+              Duration)
+   (java.time.format DateTimeFormatter)
+   java.util.concurrent.TimeUnit
+   java.util.UUID
+   java.net.URL)
   (:require [clojure.string :as cstr]
             [clojure.java.io :as io]
             [clojure.set :as cset]))
@@ -33,35 +33,35 @@
 
 (def ^:dynamic *driver*)
 
-(defn set-driver! 
+(defn set-driver!
   "Mutate *driver* dynamic variable.
   Return its argument"
   [driver]
   (alter-var-root (var *driver*)
-    (constantly driver)))
+                  (constantly driver)))
 
-(defmacro with-driver 
+(defmacro with-driver
   "Perform body with *driver* variable bound to driver"
   [driver & body]
   `(binding [*driver* ~driver]
      ~@body))
 
-(defn config-driver 
+(defn config-driver
   "Configure webdriver instance.
    Recognized options:
    :implicit-wait  (implicit wait in seconds)"
   [driver {:keys [implicit-wait]
-  	       :or {implicit-wait 3}}]
-  (when implicit-wait 
+           :or {implicit-wait 3}}]
+  (when implicit-wait
     (.. driver
-      manage
-      timeouts
-      (implicitlyWait implicit-wait TimeUnit/SECONDS))))
+        manage
+        timeouts
+        (implicitlyWait implicit-wait TimeUnit/SECONDS))))
 
-(defmulti start-driver 
+(defmulti start-driver
   "Configure and start new webdriver instance, mutate *driver* dynamic var (see set-driver!)
    Args: hashmap
-   Recognized keys: 
+   Recognized keys:
    :browser      ; [keyword]           browser type
    :url          ; [string]            optional url to navigate on start
    :args         ; [vector of strings] cli switches
@@ -160,12 +160,12 @@
 
 (defn find-elements
   ([context selector]
-    (vec (. context findElements selector)))
+   (vec (. context findElements selector)))
   ([selector] (find-elements *driver* selector)))
 
 (defn find-element
   ([context selector]
-    (. context findElement selector))
+   (. context findElement selector))
   ([selector] (find-element *driver* selector)))
 
 ;; frames navigation
@@ -204,8 +204,8 @@
   (. el isDisplayed))
 
 (defn stale?
-	"Test if given element is not available in a DOM
-	(i.e. request to this element will cause StaleElementReferenceException)"
+  "Test if given element is not available in a DOM
+        (i.e. request to this element will cause StaleElementReferenceException)"
   [element]
   (try (not (.getLocation element))
        (catch StaleElementReferenceException e true)))
@@ -213,10 +213,10 @@
 (defn get-attribute [el attr]
   (. el getAttribute attr))
 
-(defn inner-html [element] 
+(defn inner-html [element]
   (. *driver* executeScript "return arguments[0].innerHTML" (into-array [element])))
 
-(defn clean-html [element] 
+(defn clean-html [element]
   (cstr/replace (inner-html element) #"(<\w+)(\s[^>]+)(>)" "$1$3"))
 
 ;; Wait for conditions
@@ -225,16 +225,16 @@
   "Wait for specific condition.
   Args:
   condition  =>  ExpectedCondition instance
-  :timeout   =>  (optional) timeout in seconds (default is 3)" 
+  :timeout   =>  (optional) timeout in seconds (default is 3)"
   [condition & {:keys [timeout]
                 :or {timeout 3}}]
   (.. (new FluentWait *driver*)
-    (withTimeout (Duration/ofSeconds timeout)) 
-    (until condition)))
+      (withTimeout (Duration/ofSeconds timeout))
+      (until condition)))
 
 (defmacro condition [body]
-  `(proxy [ExpectedCondition] [] 
-     (~'apply [driver#] ~body) 
+  `(proxy [ExpectedCondition] []
+     (~'apply [driver#] ~body)
      (~'toString [] (str "condition: " '~body))))
 
 (defn wait-for-stale [el]
@@ -254,10 +254,10 @@
   [[element find-expression]
    & body]
   `(dorun
-     (map (fn [~'i]
-            (let [~element ((vec ~find-expression) ~'i)] 
-              (do ~@body)))
-       (range 0 (count ~find-expression)))))
+    (map (fn [~'i]
+           (let [~element ((vec ~find-expression) ~'i)]
+             (do ~@body)))
+         (range 0 (count ~find-expression)))))
 
 ;; utils
 
@@ -294,19 +294,19 @@
 
 (let [colored (atom {})]
 
-	(defn remove-highlights
-		"Back all elements previously colored by highlight fn, to its normal color"
-	  []
-	  (doseq [[el color] @colored]
+  (defn remove-highlights
+    "Back all elements previously colored by highlight fn, to its normal color"
+    []
+    (doseq [[el color] @colored]
       (when-not (stale? el)
         (set-css-property el "background-color" color)))
-      (reset! colored {}))
+    (reset! colored {}))
 
   (defn highlight
     "Highlight given element (or collection of elements) with bright color.
     Before that, remove old marks (by default)"
-    [target & {:keys [remove-old-marks] 
-    	         :or {remove-old-marks true}}]
+    [target & {:keys [remove-old-marks]
+               :or {remove-old-marks true}}]
     (when remove-old-marks
       (remove-highlights))
     (if (coll? target)
