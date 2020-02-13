@@ -73,16 +73,17 @@
    :binary       ; [string]            path to browser executable"
   :browser)
 
-(defmethod start-driver :chrome
-  [{:keys [args prefs capabilities headless? url binary]
+(defn make-chrome-options
+  "Create ChromeOptions instance based on a hashmap of options, see start-driver"
+  [{:keys [args prefs capabilities headless? binary]
     :as options}]
   (let [chrome-options (new ChromeOptions)]
-    ; hacks to hide infobars
+    ;; hacks to hide infobars
     (. chrome-options
        setExperimentalOption "useAutomationExtension" false)
     (. chrome-options
        setExperimentalOption "excludeSwitches" ["enable-automation"])
-    ; misc options
+    ;; misc options
     (when binary
       (. chrome-options setBinary binary))
     (when headless? (. chrome-options setHeadless headless?))
@@ -92,11 +93,14 @@
       (. chrome-options setExperimentalOption "prefs" prefs))
     (doseq [[k v] capabilities]
       (. chrome-options setCapability k v))
-    (let [chromedriver (new ChromeDriver chrome-options)]
-      (config-driver chromedriver options)
-      (when url
-        (.get chromedriver url))
-      (set-driver! chromedriver))))
+    chrome-options))
+
+(defmethod start-driver :chrome [{:keys [url] :as options}]
+  (let [chrome-options (make-chrome-options options)
+        chromedriver (new ChromeDriver chrome-options)]
+    (config-driver chromedriver options)
+    (when url (.get chromedriver url))
+    (set-driver! chromedriver)))
 
 (defmethod start-driver :firefox
   [{:keys [url]
