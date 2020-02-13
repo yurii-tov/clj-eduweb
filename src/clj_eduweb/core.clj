@@ -64,6 +64,7 @@
    Recognized keys:
    :browser      ; [keyword]           browser type
    :url          ; [string]            optional url to navigate on start
+   :remote-url   ; [string]            url of remote selenium server
    :args         ; [vector of strings] cli switches
    :prefs        ; [map]               'preferences' experimental option
    :capabilities ; [map]               common webdriver settings
