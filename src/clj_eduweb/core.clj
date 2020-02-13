@@ -1,7 +1,6 @@
 (ns clj-eduweb.core
   "Wrapper over Selenium API and other general-purpose stuff"
   (:import
-    ; selenium
     (org.openqa.selenium.chrome 
       ChromeDriver 
       ChromeOptions)
@@ -12,21 +11,20 @@
      WebElement 
      By 
      OutputType 
-     StaleElementReferenceException) 
+     StaleElementReferenceException)
+    org.openqa.selenium.remote.RemoteWebDriver
     org.openqa.selenium.interactions.Actions 
     (org.openqa.selenium.support.ui 
       FluentWait
       ExpectedCondition
       ExpectedConditions)
 
-    ; java.time
     (java.time LocalDate
                Duration)
     (java.time.format DateTimeFormatter)
-    
-    ; java.util
     java.util.concurrent.TimeUnit
-    java.util.UUID)
+    java.util.UUID
+    java.net.URL)
   (:require [clojure.string :as cstr]
             [clojure.java.io :as io]
             [clojure.set :as cset]))
@@ -95,9 +93,11 @@
       (. chrome-options setCapability k v))
     chrome-options))
 
-(defmethod start-driver :chrome [{:keys [url] :as options}]
+(defmethod start-driver :chrome [{:keys [url remote-url] :as options}]
   (let [chrome-options (make-chrome-options options)
-        chromedriver (new ChromeDriver chrome-options)]
+        chromedriver (if remote-url
+                       (new RemoteWebDriver (new URL remote-url) chrome-options)
+                       (new ChromeDriver chrome-options))]
     (config-driver chromedriver options)
     (when url (.get chromedriver url))
     (set-driver! chromedriver)))
