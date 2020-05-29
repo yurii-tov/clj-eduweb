@@ -6,9 +6,9 @@
 ;; text inputs
 
 (defn get-inputs
-  ([context] 
-   (find-elements context 
-     (css "input[type=text], input[type=password]")))
+  ([context]
+   (find-elements context
+                  (css "input[type=text], input[type=password]")))
   ([] (get-inputs *driver*)))
 
 ;; tables
@@ -19,21 +19,21 @@
 
 (defn table-rows [table] (find-elements table (css "tr")))
 
-(defn table-column 
+(defn table-column
   "table => either <table> element or list of <tr>
   i      => index of column"
   [table i]
-  (let [rows (if (coll? table) 
-               table 
+  (let [rows (if (coll? table)
+               table
                (table-rows table))]
-    (->> rows 
-      (map (fn [r] (nth (find-elements r (css "td")) i))) 
-      (map (fn [t] (let [text (get-text t)] 
-             (when-not (empty? text) text)))))))
+    (->> rows
+         (map (fn [r] (nth (find-elements r (css "td")) i)))
+         (map (fn [t] (let [text (get-text t)]
+                        (when-not (empty? text) text)))))))
 
 ;; radio buttons
 
-(defn get-radio-buttons 
+(defn get-radio-buttons
   ([context] (find-elements context (css "input[type=radio]")))
   ([] (get-radio-buttons *driver*)))
 
@@ -56,7 +56,7 @@
 
 ;; buttons
 
-(defn get-buttons 
+(defn get-buttons
   ([context] (find-elements context (css "button")))
   ([] (get-buttons *driver*)))
 
@@ -81,11 +81,11 @@
 (defn get-context-menus []
   (find-elements (css ".x-menu")))
 
-(defn get-context-menu-options 
+(defn get-context-menu-options
   ([context]
-    (map (fn [x] (find-element x (css "span")))
-      (remove (fn [x] (cstr/includes? (get-attribute x "class") "x-menu-sep-li"))
-        (find-elements context (css ".x-menu-list-item")))))
+   (map (fn [x] (find-element x (css "span")))
+        (remove (fn [x] (cstr/includes? (get-attribute x "class") "x-menu-sep-li"))
+                (find-elements context (css ".x-menu-list-item")))))
   ([] (get-context-menu-options *driver*)))
 
 ;; comboboxes
@@ -120,7 +120,7 @@
       (click (find-element combobox (css "img.x-form-trigger-arrow")))
       (wait-for-stale combo-list))))
 
-(defn select-combobox 
+(defn select-combobox
   "Select an option in given combobox.
   If keyword :random provided, select random option
   Arguments:
@@ -138,15 +138,15 @@
                         (fn [o] (re-matches option-spec
                                             (get-text o)))
                         :else (throw (new IllegalArgumentException
-                                       (format "Wrong option spec: %s. It should be a string, or a pattern" 
-                                               option-spec))))]
+                                          (format "Wrong option spec: %s. It should be a string, or a pattern"
+                                                  option-spec))))]
     (click (if (= option-spec :random)
              (rand-nth options-list)
              (or (first (filter predicate options-list))
                  (throw (new IllegalStateException
-                          (str "option not found: " option-spec 
-                            "; avalilable options is: "
-                            (mapv get-text options-list)))))))))
+                             (str "option not found: " option-spec
+                                  "; avalilable options is: "
+                                  (mapv get-text options-list)))))))))
 
 (defn get-combobox-options
   "Get list of given combobox options (as list of strings)"

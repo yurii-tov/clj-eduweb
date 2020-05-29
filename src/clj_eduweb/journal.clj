@@ -9,7 +9,7 @@
 
 (declare parse-date format-date)
 
-; page info
+;; page info
 
 (defn get-page-period
   "Get period of current journal page as vector of LocalDate objects, i.e. [start end]"
@@ -21,9 +21,9 @@
         (mapv parse-date result))
       (throw (new IllegalStateException "Unable to parse period from %s" text)))))
 
-; tasks
+;; tasks
 
-(defn get-tasks [] 
+(defn get-tasks []
   (find-elements (css ".x-grid3-col-theme")))
 
 (defn gen-taskname []
@@ -59,13 +59,13 @@
          [window] (get-windows)
          [button :as buttons] (get-buttons window)
          [_ title-input] (get-inputs window)]
-     (send-keys title-input 
+     (send-keys title-input
                 (if (= title :random)
                   (gen-taskname)
                   title))
      (when control-work?
-       (set-checkbox 
-        (first (get-checkboxes window)) 
+       (set-checkbox
+        (first (get-checkboxes window))
         control-work?))
      (when date
        (let [date (cond (instance? LocalDate date)
@@ -77,8 +77,8 @@
        (let [[lesson-type-combo
               activity-combo
               scale-combo] (get-comboboxes window)]
-         (dorun (map (fn [combo value] 
-                       (when value (select-combobox combo value))) 
+         (dorun (map (fn [combo value]
+                       (when value (select-combobox combo value)))
                      [lesson-type-combo activity-combo]
                      [lesson-type activity]))
          (when scale
@@ -86,7 +86,7 @@
            (select-combobox scale-combo scale))))
      (click button)
      (wait-for-stale window)
-     (wait-for (condition (> (count (get-tasks)) 
+     (wait-for (condition (> (count (get-tasks))
                              tasks-count))))))
 
 (defn add-tasks
@@ -111,8 +111,8 @@
          (take count)
          (map add-task)
          dorun)))
-  
-; total marks
+
+;; total marks
 
 (defn add-total-mark
   "Parameters:
@@ -130,25 +130,25 @@
       (click (first (get-buttons window)))
       (wait-for-stale window))))
 
-; cells
+;; cells
 
 (defn get-cells [] (find-elements *driver* (css "td.mark-cell")))
 
 (defn get-columns []
   (let [cells (get-cells)
-        get-col-num (fn [c] 
-                      (second (re-find #"x-grid3-td-markColumn(\d+)" 
+        get-col-num (fn [c]
+                      (second (re-find #"x-grid3-td-markColumn(\d+)"
                                        (get-attribute c "class"))))
         col-count (count (set (map get-col-num cells)))]
     (apply map vector (partition col-count cells))))
 
 (defn get-column [taskname]
-  ((get-columns) 
+  ((get-columns)
    (. (mapv get-text (get-tasks)) indexOf taskname)))
 
-; marks
+;; marks
 
-(defn edit-mark 
+(defn edit-mark
   "Apply changes to given cell
   edit => function of dialog window"
   [cell edit]
@@ -158,12 +158,12 @@
     (close-window w)
     (wait-for-stale cell)))
 
-(defn set-mark 
-  "Set specific mark to given cell. 
+(defn set-mark
+  "Set specific mark to given cell.
   For randomness use set-random-mark or set-random-marks functions"
   [cell mark]
   (edit-mark
-   cell 
+   cell
    (fn [w]
      (->> w
           get-buttons
@@ -171,8 +171,8 @@
           first click))))
 
 (defn clear-mark [cell]
-  (when (or (seq (get-text cell)) 
-            (cstr/includes? (get-attribute cell "class") 
+  (when (or (seq (get-text cell))
+            (cstr/includes? (get-attribute cell "class")
                             "to-survey"))
     (edit-mark cell
                (fn [w] (click (first (filter pressed? (get-buttons w))))))))
@@ -181,7 +181,7 @@
   "Fill given cell with random mark"
   [cell & marks-to-exclude]
   (edit-mark cell
-             (fn [w] 
+             (fn [w]
                (let [not-excluded? (comp (complement (set marks-to-exclude)) get-text)
                      buttons (filter (every-pred not-excluded? displayed?) (get-buttons w))]
                  (click (rand-nth buttons))))))

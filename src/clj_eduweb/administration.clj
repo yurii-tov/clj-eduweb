@@ -4,7 +4,7 @@
 
 ;; journals
 
-(defn add-journal 
+(defn add-journal
   "Add new journal page.
   Args: journal-spec (hashmap)
   Recognized options:
@@ -16,7 +16,7 @@
   (click (find-element (css "#e4-administration-menutree-journallist-addItem button")))
   (let [[window] (get-windows)]
     (dorun (map (fn [combo value]
-                  (when value 
+                  (when value
                     (select-combobox combo value)))
                 (get-comboboxes window)
                 [period subject group teacher]))
