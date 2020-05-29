@@ -238,8 +238,8 @@
      (~'apply [driver#] ~body)
      (~'toString [] (str "condition: " '~body))))
 
-(defn wait-for-stale [el]
-  (wait-for (ExpectedConditions/stalenessOf el)))
+(defn wait-for-stale [el & args]
+  (apply wait-for (cons (ExpectedConditions/stalenessOf el) args)))
 
 ;; control structures
 
