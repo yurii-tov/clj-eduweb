@@ -5,11 +5,15 @@
             [clj-eduweb.elements :refer :all]
             [clojure.string :as cstr]))
 
+
 (def ^:dynamic *date-format* "dd.MM.yy")
+
 
 (declare parse-date format-date)
 
+
 ;; page info
+
 
 (defn get-page-period
   "Get period of current journal page as vector of LocalDate objects, i.e. [start end]"
@@ -21,13 +25,17 @@
         (mapv parse-date result))
       (throw (new IllegalStateException "Unable to parse period from %s" text)))))
 
+
 ;; tasks
+
 
 (defn get-tasks []
   (find-elements (css ".x-grid3-col-theme")))
 
+
 (defn gen-taskname []
   (apply str (take 8 (uuid))))
+
 
 (defn add-task
   "Add new task.
@@ -89,6 +97,7 @@
      (wait-for (condition (> (count (get-tasks))
                              tasks-count))))))
 
+
 (defn add-tasks
   "Create a bunch of tasks.
   Parameters:
@@ -112,7 +121,9 @@
          (map add-task)
          dorun)))
 
+
 ;; total marks
+
 
 (defn add-total-mark
   "Parameters:
@@ -130,9 +141,12 @@
       (click (first (get-buttons window)))
       (wait-for-stale window))))
 
+
 ;; cells
 
+
 (defn get-cells [] (find-elements *driver* (css "td.mark-cell")))
+
 
 (defn get-columns []
   (let [cells (get-cells)
@@ -142,11 +156,14 @@
         col-count (count (set (map get-col-num cells)))]
     (apply map vector (partition col-count cells))))
 
+
 (defn get-column [taskname]
   ((get-columns)
    (. (mapv get-text (get-tasks)) indexOf taskname)))
 
+
 ;; marks
+
 
 (defn edit-mark
   "Apply changes to given cell
@@ -157,6 +174,7 @@
     (edit w)
     (close-window w)
     (wait-for-stale cell)))
+
 
 (defn set-mark
   "Set specific mark to given cell.
@@ -170,12 +188,14 @@
           (filter (fn [b] (= mark (get-text b))))
           first click))))
 
+
 (defn clear-mark [cell]
   (when (or (seq (get-text cell))
             (cstr/includes? (get-attribute cell "class")
                             "to-survey"))
     (edit-mark cell
                (fn [w] (click (first (filter pressed? (get-buttons w))))))))
+
 
 (defn set-random-mark
   "Fill given cell with random mark"
@@ -186,6 +206,7 @@
                      buttons (filter (every-pred not-excluded? displayed?) (get-buttons w))]
                  (click (rand-nth buttons))))))
 
+
 (defn set-random-marks
   "Fill all existing cells on page with random marks"
   [& marks-to-exclude]
@@ -193,10 +214,13 @@
                    (and (> (rand-int 10) 0)
                         (apply set-random-mark cell marks-to-exclude))))
 
+
 ;; utils
+
 
 (defn parse-date [s]
   (LocalDate/parse s (DateTimeFormatter/ofPattern *date-format*)))
+
 
 (defn format-date [date]
   (.format date (DateTimeFormatter/ofPattern *date-format*)))

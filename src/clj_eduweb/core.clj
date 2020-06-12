@@ -29,9 +29,12 @@
             [clojure.java.io :as io]
             [clojure.set :as cset]))
 
+
 ;; driver management
 
+
 (def ^:dynamic *driver*)
+
 
 (defn set-driver!
   "Mutate *driver* dynamic variable.
@@ -40,11 +43,13 @@
   (alter-var-root (var *driver*)
                   (constantly driver)))
 
+
 (defmacro with-driver
   "Perform body with *driver* variable bound to driver"
   [driver & body]
   `(binding [*driver* ~driver]
      ~@body))
+
 
 (defn config-driver
   "Configure webdriver instance.
@@ -57,6 +62,7 @@
         manage
         timeouts
         (implicitlyWait implicit-wait TimeUnit/SECONDS))))
+
 
 (defmulti start-driver
   "Configure and start new webdriver instance, mutate *driver* dynamic var (see set-driver!)
@@ -71,6 +77,7 @@
    :headless?    ; [boolean]           on/off headless mode
    :binary       ; [string]            path to browser executable"
   :browser)
+
 
 (defn make-chrome-options
   "Create ChromeOptions instance based on a hashmap of options, see start-driver"
@@ -94,6 +101,7 @@
       (. chrome-options setCapability k v))
     chrome-options))
 
+
 (defmethod start-driver :chrome [{:keys [url remote-url] :as options}]
   (let [chrome-options (make-chrome-options options)
         chromedriver (if remote-url
@@ -102,6 +110,7 @@
     (config-driver chromedriver options)
     (when url (.get chromedriver url))
     (set-driver! chromedriver)))
+
 
 (defmethod start-driver :firefox
   [{:keys [url]
@@ -114,15 +123,19 @@
         (.get firefox-driver url))
       (set-driver! firefox-driver))))
 
+
 (defn quit-driver []
   (.quit *driver*))
 
+
 ;; navigation
+
 
 (defn get-url
   "Navigate browser to given url"
   [url]
   (.get *driver* url))
+
 
 (defmacro open-popup
   "Save current set of opened windows, then perform body (assuming new opened windows), then return set of newly opened windows"
@@ -132,7 +145,9 @@
      (cset/difference (set (.. *driver* ~'getWindowHandles))
                       popups#)))
 
+
 ;; take screenshots
+
 
 (defn take-screenshot
   "Take screenshot of the page.
@@ -151,35 +166,44 @@
         :else
         (throw (new IllegalStateException (str "Wrong argument: " output)))))
 
+
 ;; find elements
+
 
 (defn css [selector]
   (By/cssSelector selector))
 
+
 (defn xpath [selector]
   (By/xpath selector))
+
 
 (defn find-elements
   ([context selector]
    (vec (. context findElements selector)))
   ([selector] (find-elements *driver* selector)))
 
+
 (defn find-element
   ([context selector]
    (. context findElement selector))
   ([selector] (find-element *driver* selector)))
 
+
 ;; frames navigation
+
 
 (defn switch-to-frame
   "Switch to frame presented as WebElement"
   [el]
   (.. *driver* switchTo (frame el)))
 
+
 (defn switch-to-parent-context
   "Navigate one nesting level up from current frame"
   []
   (.. *driver* switchTo parentFrame))
+
 
 (defmacro with-frame
   "Perform actions in a context of frame, then go back to parent context, in despite of any errors"
@@ -187,22 +211,30 @@
   `(do (switch-to-frame ~frame)
        (try ~@body (finally (switch-to-parent-context)))))
 
+
 ;; perform actions on elements
 
+
 (defn click [el] (. el click))
+
 
 (defn send-keys [input text]
   (. input clear)
   (. input sendKeys (into-array [text])))
 
+
 (defn double-click [el] (.. (new Actions *driver*) (doubleClick el) perform))
+
 
 ;; get information about elements
 
+
 (defn get-text [el] (cstr/trim (. el getText)))
+
 
 (defn displayed? [el]
   (. el isDisplayed))
+
 
 (defn stale?
   "Test if given element is not available in a DOM
@@ -211,16 +243,21 @@
   (try (not (.getLocation element))
        (catch StaleElementReferenceException e true)))
 
+
 (defn get-attribute [el attr]
   (. el getAttribute attr))
+
 
 (defn inner-html [element]
   (. *driver* executeScript "return arguments[0].innerHTML" (into-array [element])))
 
+
 (defn clean-html [element]
   (cstr/replace (inner-html element) #"(<\w+)(\s[^>]+)(>)" "$1$3"))
 
+
 ;; Wait for conditions
+
 
 (defn wait-for
   "Wait for specific condition.
@@ -233,20 +270,25 @@
       (withTimeout (Duration/ofSeconds timeout))
       (until condition)))
 
+
 (defmacro condition [body]
   `(proxy [ExpectedCondition] []
      (~'apply [driver#] ~body)
      (~'toString [] (str "condition: " '~body))))
 
+
 (defn wait-for-stale [el & args]
   (apply wait-for (cons (ExpectedConditions/stalenessOf el) args)))
 
+
 ;; control structures
+
 
 (defmacro with-retry
   "Perform an action, and if any exception occurs, retry"
   [& body]
   `(try ~@body (catch Throwable ~'t ~@body)))
+
 
 (defmacro foreach-element
   "Find n elements by find-expression.
@@ -260,10 +302,13 @@
              (do ~@body)))
          (range 0 (count ~find-expression)))))
 
+
 ;; utils
+
 
 (defn uuid []
   (str (UUID/randomUUID)))
+
 
 (defn mk-date-gen
   "Create generator function which generate LocalDate objects
@@ -278,6 +323,7 @@
      (fn [] (swap! s inc-days))))
   ([] (mk-date-gen {})))
 
+
 (defn set-css-property
   "Set given css property of element.
   Example:
@@ -291,7 +337,9 @@
                           value)
                   (into-array [el])))
 
+
 ;; elements highlighting
+
 
 (let [colored (atom {})]
 

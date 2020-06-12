@@ -2,7 +2,9 @@
   (:require [clj-eduweb.core :refer :all]
             [clj-eduweb.elements :refer :all]))
 
+
 ;; journals
+
 
 (defn add-journal
   "Add new journal page.
