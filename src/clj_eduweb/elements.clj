@@ -7,18 +7,18 @@
 ;; text inputs
 
 
-(defn get-inputs
+(defn find-inputs
   ([context]
    (find-elements context
                   (css "input[type=text], input[type=password]")))
-  ([] (get-inputs *driver*)))
+  ([] (find-inputs *driver*)))
 
 
 ;; tables
 
 
-(defn get-tables
-  ([] (get-tables *driver*))
+(defn find-tables
+  ([] (find-tables *driver*))
   ([context] (find-elements context (css "table"))))
 
 
@@ -41,17 +41,17 @@
 ;; radio buttons
 
 
-(defn get-radio-buttons
+(defn find-radio-buttons
   ([context] (find-elements context (css "input[type=radio]")))
-  ([] (get-radio-buttons *driver*)))
+  ([] (find-radio-buttons *driver*)))
 
 
 ;; checkboxes
 
 
-(defn get-checkboxes
+(defn find-checkboxes
   ([context] (find-elements context (css "input[type=checkbox]")))
-  ([] (get-checkboxes *driver*)))
+  ([] (find-checkboxes *driver*)))
 
 
 (defn set-checkbox
@@ -69,9 +69,9 @@
 ;; buttons
 
 
-(defn get-buttons
+(defn find-buttons
   ([context] (find-elements context (css "button")))
-  ([] (get-buttons *driver*)))
+  ([] (find-buttons *driver*)))
 
 
 (defn pressed? [button]
@@ -81,13 +81,13 @@
 ;; dialog windows
 
 
-(defn get-windows [] (find-elements (css ".x-window")))
+(defn find-windows [] (find-elements (css ".x-window")))
 
 
-(def get-window
-  "Shorthand for (first (get-windows)).
+(def find-window
+  "Shorthand for (first (find-windows)).
   Useful if there is only one window"
-  (comp first get-windows))
+  (comp first find-windows))
 
 
 (defn close-window [window]
@@ -98,34 +98,34 @@
 ;; context menu
 
 
-(defn get-context-menus []
+(defn find-context-menus []
   (find-elements (css ".x-menu")))
 
 
-(defn get-context-menu-options
+(defn find-context-menu-options
   ([context]
    (map (fn [x] (find-element x (css "span")))
         (remove (fn [x] (cstr/includes? (get-attribute x "class") "x-menu-sep-li"))
                 (find-elements context (css ".x-menu-list-item")))))
-  ([] (get-context-menu-options *driver*)))
+  ([] (find-context-menu-options *driver*)))
 
 
 ;; comboboxes
 
 
-(defn get-combo-lists
+(defn find-combo-lists
   ([context] (find-elements context (css ".x-combo-list-inner")))
-  ([] (get-combo-lists *driver*)))
+  ([] (find-combo-lists *driver*)))
 
 
-(defn get-combo-listitems
+(defn find-combo-listitems
   "Get list items (as web elements) from given context"
   ([context] (find-elements context (css "[role=listitem]")))
-  ([] (get-combo-listitems *driver*)))
+  ([] (find-combo-listitems *driver*)))
 
 
-(defn get-comboboxes
-  ([] (get-comboboxes *driver*))
+(defn find-comboboxes
+  ([] (find-comboboxes *driver*))
   ([context] (find-elements context (css "[role=combobox]"))))
 
 
@@ -135,14 +135,14 @@
   [combobox]
   (with-retry
     (click (find-element combobox (css "img.x-form-trigger-arrow")))
-    (wait-for (condition (let [combo-lists (get-combo-lists)]
+    (wait-for (condition (let [combo-lists (find-combo-lists)]
                            (and (= 1 (count combo-lists))
                                 (first combo-lists)))))))
 
 
 (defn collapse-combobox
   [combobox]
-  (let [[combo-list] (get-combo-lists)]
+  (let [[combo-list] (find-combo-lists)]
     (when combo-list
       (click (find-element combobox (css "img.x-form-trigger-arrow")))
       (wait-for-stale combo-list))))
@@ -158,7 +158,7 @@
       String
       java.util.regex.Pattern"
   [combobox option-spec]
-  (let [options-list (get-combo-listitems (expand-combobox combobox))
+  (let [options-list (find-combo-listitems (expand-combobox combobox))
         predicate (cond (string? option-spec)
                         (fn [o] (= (get-text o) option-spec))
                         (= java.util.regex.Pattern
@@ -177,16 +177,16 @@
                                   (mapv get-text options-list)))))))))
 
 
-(defn get-combobox-options
+(defn find-combobox-options
   "Get list of given combobox options (as list of strings)"
   [combobox]
   (expand-combobox combobox)
-  (let [options (mapv get-text (get-combo-listitems))]
+  (let [options (mapv get-text (find-combo-listitems))]
     (collapse-combobox combobox)
     options))
 
 
-(defn get-combobox-value
+(defn find-combobox-value
   "Get current selected value of a combobox"
   [combo]
-  (get-attribute (first (get-inputs combo)) "value"))
+  (get-attribute (first (find-inputs combo)) "value"))

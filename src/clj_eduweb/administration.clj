@@ -16,11 +16,11 @@
   :teacher"
   [{:keys [period subject group teacher]}]
   (click (find-element (css "#e4-administration-menutree-journallist-addItem button")))
-  (let [[window] (get-windows)]
+  (let [[window] (find-windows)]
     (dorun (map (fn [combo value]
                   (when value
                     (select-combobox combo value)))
-                (get-comboboxes window)
+                (find-comboboxes window)
                 [period subject group teacher]))
-    (click (first (get-buttons window)))
+    (click (first (find-buttons window)))
     (wait-for-stale window)))

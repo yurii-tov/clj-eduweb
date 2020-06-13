@@ -64,33 +64,33 @@
      :or {title :random}}]
    (click (find-element (css "#e4-journal-TaskList-addTaskButton button")))
    (let [tasks-count (count (get-tasks))
-         [window] (get-windows)
-         [button :as buttons] (get-buttons window)
-         [_ title-input] (get-inputs window)]
+         [window] (find-windows)
+         [button :as buttons] (find-buttons window)
+         [_ title-input] (find-inputs window)]
      (send-keys title-input
                 (if (= title :random)
                   (gen-taskname)
                   title))
      (when control-work?
        (set-checkbox
-        (first (get-checkboxes window))
+        (first (find-checkboxes window))
         control-work?))
      (when date
        (let [date (cond (instance? LocalDate date)
                         (format-date date)
                         :else date)]
-         (send-keys (first (get-inputs window)) date)))
+         (send-keys (first (find-inputs window)) date)))
      (when (or lesson-type activity scale)
        (click (last buttons))
        (let [[lesson-type-combo
               activity-combo
-              scale-combo] (get-comboboxes window)]
+              scale-combo] (find-comboboxes window)]
          (dorun (map (fn [combo value]
                        (when value (select-combobox combo value)))
                      [lesson-type-combo activity-combo]
                      [lesson-type activity]))
          (when scale
-           (set-checkbox (last (get-checkboxes window)) true)
+           (set-checkbox (last (find-checkboxes window)) true)
            (select-combobox scale-combo scale))))
      (click button)
      (wait-for-stale window)
@@ -133,12 +133,12 @@
     (assert (some #{mark} valid-options)
             (str "valid options are: " valid-options))
     (click (find-element (css "#e4-journal-TaskList-addTaskButton .x-btn-mr")))
-    (click (first (get-context-menu-options (first (get-context-menus)))))
-    (let [[window] (get-windows)
-          options (get-radio-buttons window)
+    (click (first (find-context-menu-options (first (find-context-menus)))))
+    (let [[window] (find-windows)
+          options (find-radio-buttons window)
           option (get (into {} (map vector valid-options options)) mark)]
       (click option)
-      (click (first (get-buttons window)))
+      (click (first (find-buttons window)))
       (wait-for-stale window))))
 
 
@@ -170,7 +170,7 @@
   edit => function of dialog window"
   [cell edit]
   (double-click cell)
-  (let [[w] (get-windows)]
+  (let [[w] (find-windows)]
     (edit w)
     (close-window w)
     (wait-for-stale cell)))
@@ -184,7 +184,7 @@
    cell
    (fn [w]
      (->> w
-          get-buttons
+          find-buttons
           (filter (fn [b] (= mark (get-text b))))
           first click))))
 
@@ -194,7 +194,7 @@
             (cstr/includes? (get-attribute cell "class")
                             "to-survey"))
     (edit-mark cell
-               (fn [w] (click (first (filter pressed? (get-buttons w))))))))
+               (fn [w] (click (first (filter pressed? (find-buttons w))))))))
 
 
 (defn set-random-mark
@@ -203,7 +203,7 @@
   (edit-mark cell
              (fn [w]
                (let [not-excluded? (comp (complement (set marks-to-exclude)) get-text)
-                     buttons (filter (every-pred not-excluded? displayed?) (get-buttons w))]
+                     buttons (filter (every-pred not-excluded? displayed?) (find-buttons w))]
                  (click (rand-nth buttons))))))
 
 
