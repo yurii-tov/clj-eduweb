@@ -65,7 +65,7 @@
    (click (find-element (css "#e4-journal-TaskList-addTaskButton button")))
    (let [tasks-count (count (get-tasks))
          [window] (find-windows)
-         [button :as buttons] (find-buttons window)
+         buttons (find-buttons window)
          [_ title-input] (find-inputs window)]
      (send-keys title-input
                 (if (= title :random)
@@ -92,7 +92,7 @@
          (when scale
            (set-checkbox (last (find-checkboxes window)) true)
            (select-combobox scale-combo scale))))
-     (click button)
+     (click (nth buttons 3))
      (wait-for-stale window)
      (wait-for (condition (> (count (get-tasks))
                              tasks-count))))))
