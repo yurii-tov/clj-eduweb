@@ -248,12 +248,12 @@
   (. el getAttribute attr))
 
 
-(defn inner-html [element]
+(defn get-inner-html [element]
   (. *driver* executeScript "return arguments[0].innerHTML" (into-array [element])))
 
 
-(defn clean-html [element]
-  (cstr/replace (inner-html element) #"(<\w+)(\s[^>]+)(>)" "$1$3"))
+(defn get-clean-html [element]
+  (cstr/replace (get-inner-html element) #"(<\w+)(\s[^>]+)(>)" "$1$3"))
 
 
 ;; Wait for conditions
