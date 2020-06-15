@@ -72,7 +72,7 @@
                   (gen-taskname)
                   title))
      (when control-work?
-       (set-checkbox
+       (checkbox-set
         (first (find-checkboxes window))
         control-work?))
      (when date
@@ -86,12 +86,12 @@
               activity-combo
               scale-combo] (find-comboboxes window)]
          (dorun (map (fn [combo value]
-                       (when value (select-combobox combo value)))
+                       (when value (combobox-select combo value)))
                      [lesson-type-combo activity-combo]
                      [lesson-type activity]))
          (when scale
-           (set-checkbox (last (find-checkboxes window)) true)
-           (select-combobox scale-combo scale))))
+           (checkbox-set (last (find-checkboxes window)) true)
+           (combobox-select scale-combo scale))))
      (click button)
      (wait-for-stale window)
      (wait-for (condition (> (count (get-tasks))
@@ -133,7 +133,7 @@
     (assert (some #{mark} valid-options)
             (str "valid options are: " valid-options))
     (click (find-element (css "#e4-journal-TaskList-addTaskButton .x-btn-mr")))
-    (click (first (find-context-menu-options (first (find-context-menus)))))
+    (click (first (context-menu-options (first (find-context-menus)))))
     (let [[window] (find-windows)
           options (find-radio-buttons window)
           option (get (into {} (map vector valid-options options)) mark)]
@@ -172,7 +172,7 @@
   (double-click cell)
   (let [[w] (find-windows)]
     (edit w)
-    (close-window w)
+    (window-close w)
     (wait-for-stale cell)))
 
 
@@ -194,7 +194,7 @@
             (cstr/includes? (get-attribute cell "class")
                             "to-survey"))
     (edit-mark cell
-               (fn [w] (click (first (filter pressed? (find-buttons w))))))))
+               (fn [w] (click (first (filter button-pressed? (find-buttons w))))))))
 
 
 (defn set-random-mark

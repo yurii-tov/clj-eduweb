@@ -54,12 +54,12 @@
   ([] (find-checkboxes *driver*)))
 
 
-(defn set-checkbox
+(defn checkbox-set
   "set checkbox to on or off.
   if :random keyword provided, set random value"
   [checkbox option]
   (if (= option :random)
-    (set-checkbox checkbox (zero? (rand-int 2)))
+    (checkbox-set checkbox (zero? (rand-int 2)))
     (let [checked? (get-attribute checkbox "checked")]
       (if option
         (or checked? (click checkbox))
@@ -74,7 +74,7 @@
   ([] (find-buttons *driver*)))
 
 
-(defn pressed? [button]
+(defn button-pressed? [button]
   (= "true" (get-attribute button "aria-pressed")))
 
 
@@ -90,7 +90,7 @@
   (comp first find-windows))
 
 
-(defn close-window [window]
+(defn window-close [window]
   (click (find-element window (css ".x-tool-close")))
   (wait-for-stale window))
 
@@ -102,12 +102,12 @@
   (find-elements (css ".x-menu")))
 
 
-(defn find-context-menu-options
+(defn context-menu-options
   ([context]
    (map (fn [x] (find-element x (css "span")))
         (remove (fn [x] (cstr/includes? (get-attribute x "class") "x-menu-sep-li"))
                 (find-elements context (css ".x-menu-list-item")))))
-  ([] (find-context-menu-options *driver*)))
+  ([] (context-menu-options *driver*)))
 
 
 ;; comboboxes
@@ -129,7 +129,7 @@
   ([context] (find-elements context (css "[role=combobox]"))))
 
 
-(defn expand-combobox
+(defn combobox-expand
   "Expand given combobox, ensure there is only one combo-list appeared.
    Returns combo-list"
   [combobox]
@@ -140,7 +140,7 @@
                                 (first combo-lists)))))))
 
 
-(defn collapse-combobox
+(defn combobox-collapse
   [combobox]
   (let [[combo-list] (find-combo-lists)]
     (when combo-list
@@ -148,7 +148,7 @@
       (wait-for-stale combo-list))))
 
 
-(defn select-combobox
+(defn combobox-select
   "Select an option in given combobox.
   If keyword :random provided, select random option
   Arguments:
@@ -158,7 +158,7 @@
       String
       java.util.regex.Pattern"
   [combobox option-spec]
-  (let [options-list (find-combo-listitems (expand-combobox combobox))
+  (let [options-list (find-combo-listitems (combobox-expand combobox))
         predicate (cond (string? option-spec)
                         (fn [o] (= (get-text o) option-spec))
                         (= java.util.regex.Pattern
@@ -177,16 +177,16 @@
                                   (mapv get-text options-list)))))))))
 
 
-(defn find-combobox-options
+(defn combobox-options
   "Get list of given combobox options (as list of strings)"
   [combobox]
-  (expand-combobox combobox)
+  (combobox-expand combobox)
   (let [options (mapv get-text (find-combo-listitems))]
-    (collapse-combobox combobox)
+    (combobox-collapse combobox)
     options))
 
 
-(defn find-combobox-value
+(defn combobox-value
   "Get current selected value of a combobox"
   [combo]
   (get-attribute (first (find-inputs combo)) "value"))

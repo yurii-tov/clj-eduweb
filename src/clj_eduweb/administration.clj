@@ -19,7 +19,7 @@
   (let [[window] (find-windows)]
     (dorun (map (fn [combo value]
                   (when value
-                    (select-combobox combo value)))
+                    (combobox-select combo value)))
                 (find-comboboxes window)
                 [period subject group teacher]))
     (click (first (find-buttons window)))
