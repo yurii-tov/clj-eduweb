@@ -61,6 +61,10 @@
   (.selectByVisibleText (new Select (:element i)) answer))
 
 
+(defmethod interaction-fill :text-input [i answer]
+  (send-keys (:element i) answer))
+
+
 ;; Qti control elements
 
 
