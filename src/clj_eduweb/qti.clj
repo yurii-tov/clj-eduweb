@@ -33,7 +33,7 @@
 
 
 (defn find-qti-interactions []
-  (let [p (get-qti-main-panel)]
+  (let [p (find-qti-main-panel)]
     (with-driver-config {:implicit-wait 0}
       (doall (for [[i-type selector] {:choice ".choice-interaction"
                                       :text-input "input[type=text]"
