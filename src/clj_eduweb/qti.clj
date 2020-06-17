@@ -32,7 +32,7 @@
 ;; Qti contents (interactions)
 
 
-(defn find-qti-interactions []
+(defn find-interactions []
   (let [p (find-qti-main-panel)]
     (with-driver-config {:implicit-wait 0}
       (doall (for [[i-type selector] {:choice ".choice-interaction"
@@ -89,11 +89,11 @@
   (assoc storage
          (:path *qti-frame*)
          (mapv interaction-value
-               (find-qti-interactions))))
+               (find-interactions))))
 
 
 (defn fill-answer [storage]
   (when-let [answer (-> *qti-frame* :path storage)]
     (dorun (map interaction-fill
-                (find-qti-interactions)
+                (find-interactions)
                 answer))))
