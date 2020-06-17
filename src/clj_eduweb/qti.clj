@@ -64,36 +64,36 @@
 ;; Qti control elements
 
 
-(defn qti-show-answer []
+(defn show-answer []
   (click (find-element (css "#show-solution-button"))))
 
 
-(defn qti-submit []
+(defn submit []
   (click (find-element (css "#commit-button"))))
 
 
-(defn qti-next []
+(defn move-forward []
   (click (find-element (css "#next-button"))))
 
 
 ;; Content testing
 
 
-(def qti-answers (atom {}))
+(def answers (atom {}))
 
 
-(defn qti-store-answer []
-  (qti-show-answer)
+(defn store-answer []
+  (show-answer)
   (Thread/sleep 1)
-  (swap! qti-answers
+  (swap! answers
          assoc
          (:path *qti-frame*)
          (mapv interaction-value
                (find-qti-interactions))))
 
 
-(defn qti-fill []
-  (when-let [answer (@qti-answers (:path *qti-frame*))]
+(defn fill-answer []
+  (when-let [answer (@answers (:path *qti-frame*))]
     (dorun (map interaction-fill
                 (find-qti-interactions)
                 answer))))
