@@ -75,9 +75,8 @@
   [config & body]
   `(let [~'old-config ((deref driver-config) *driver*)]
      (config-driver! *driver* ~config)
-     (let [~'result (do ~@body)]
-       (config-driver! *driver* ~'old-config)
-       ~'result)))
+     (try ~@body
+          (finally (config-driver! *driver* ~'old-config)))))
 
 
 (defmulti start-driver
