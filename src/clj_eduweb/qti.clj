@@ -54,6 +54,12 @@
   (get-attribute (:element i) "value"))
 
 
+(defmethod interaction-value :choice [i]
+  (set (map (fn [x] (get-attribute x "value"))
+            (find-elements (:element i)
+                           (css "input[checked]")))))
+
+
 (defmulti interaction-fill (fn [i _] (:itype i)))
 
 
@@ -63,6 +69,13 @@
 
 (defmethod interaction-fill :text-input [i answer]
   (send-keys (:element i) answer))
+
+
+(defmethod interaction-fill :choice [i answer]
+  (->> (find-elements (:element i) (css "input"))
+       (filter (comp answer (fn [x] (get-attribute x "value"))))
+       (map click)
+       dorun))
 
 
 ;; Qti control elements
