@@ -83,21 +83,17 @@
 ;; Content testing
 
 
-(def answers (atom {}))
-
-
-(defn store-answer []
+(defn store-answer [storage]
   (show-answer)
   (Thread/sleep 200)
-  (swap! answers
-         assoc
+  (assoc storage
          (:path *qti-frame*)
          (mapv interaction-value
                (find-qti-interactions))))
 
 
-(defn fill-answer []
-  (when-let [answer (@answers (:path *qti-frame*))]
+(defn fill-answer [storage]
+  (when-let [answer (-> *qti-frame* :path storage)]
     (dorun (map interaction-fill
                 (find-qti-interactions)
                 answer))))

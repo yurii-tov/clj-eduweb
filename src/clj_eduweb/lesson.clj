@@ -34,11 +34,14 @@
 ;; Content testing
 
 
+(def answers (atom {}))
+
+
 (defn store-answer []
   "Store answer for current qti question, jump to the next one"
   (let [frame (qti/find-qti-frame)]
     (qti/with-qti-frame frame
-      (qti/store-answer))
+      (swap! answers qti/store-answer))
     (move-forward frame)))
 
 
@@ -46,13 +49,15 @@
   "Plug stored answer into current question, jump to the next one"
   (let [frame (qti/find-qti-frame)]
     (qti/with-qti-frame frame
-      (qti/fill-answer)
+      (qti/fill-answer @answers)
       (qti/submit))
     (move-forward frame)))
 
 
 (defn store-answers []
-  (while (store-answer)))
+  (reset! answers {})
+  (while (store-answer))
+  @answers)
 
 
 (defn fill-answers []
