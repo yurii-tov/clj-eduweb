@@ -82,7 +82,7 @@
 (def qti-answers (atom {}))
 
 
-(defn qti-collect-answer []
+(defn qti-store-answer []
   (qti-show-answer)
   (Thread/sleep 1)
   (swap! qti-answers
