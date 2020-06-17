@@ -36,6 +36,9 @@
 (def ^:dynamic *driver*)
 
 
+(def driver-config (atom {}))
+
+
 (defn set-driver!
   "Mutate *driver* dynamic variable.
   Return its argument"
@@ -51,17 +54,29 @@
      ~@body))
 
 
-(defn config-driver
-  "Configure webdriver instance.
+(defn config-driver!
+  "Configure given webdriver instance, store config for further re-definition
    Recognized options:
    :implicit-wait  (implicit wait in seconds)"
   [driver {:keys [implicit-wait]
-           :or {implicit-wait 3}}]
+           :or {implicit-wait 3}
+           :as config}]
   (when implicit-wait
     (.. driver
         manage
         timeouts
-        (implicitlyWait implicit-wait TimeUnit/SECONDS))))
+        (implicitlyWait implicit-wait TimeUnit/SECONDS)))
+  (swap! driver-config assoc driver config))
+
+
+(defmacro with-driver-config
+  "Perform body with *driver* configured according to provider config, then restore previous settings
+   See config-driver!"
+  [config & body]
+  `(let [~'old-config ((deref driver-config) *driver*)]
+     (config-driver! *driver* ~config)
+     (do ~@body)
+     (config-driver! *driver* ~'old-config)))
 
 
 (defmulti start-driver
@@ -107,7 +122,7 @@
         chromedriver (if remote-url
                        (new RemoteWebDriver (new URL remote-url) chrome-options)
                        (new ChromeDriver chrome-options))]
-    (config-driver chromedriver options)
+    (config-driver! chromedriver options)
     (when url (.get chromedriver url))
     (set-driver! chromedriver)))
 
@@ -118,7 +133,7 @@
   (let [firefox-options (new FirefoxOptions)]
     (.setCapability firefox-options "marionette" false)
     (let [firefox-driver (new FirefoxDriver firefox-options)]
-      (config-driver firefox-driver options)
+      (config-driver! firefox-driver options)
       (when url
         (.get firefox-driver url))
       (set-driver! firefox-driver))))
