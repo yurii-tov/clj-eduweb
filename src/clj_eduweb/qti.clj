@@ -88,7 +88,7 @@
 
 (defn store-answer []
   (show-answer)
-  (Thread/sleep 1)
+  (Thread/sleep 200)
   (swap! answers
          assoc
          (:path *qti-frame*)
