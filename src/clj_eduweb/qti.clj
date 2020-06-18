@@ -99,6 +99,16 @@
   (click (find-element (css "#next-button"))))
 
 
+;; Fetch question data
+
+
+(defn fetch-data []
+  (execute-javascript
+   (format "return (await fetch('%s/%s').then(r => r.text()))"
+           (get-base-url)
+           (:path *qti-frame*))))
+
+
 ;; Content testing
 
 

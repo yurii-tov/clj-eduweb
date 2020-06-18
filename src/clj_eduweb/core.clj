@@ -143,7 +143,7 @@
   (.quit *driver*))
 
 
-;; navigation
+;; browser control
 
 
 (defn get-url
@@ -156,6 +156,10 @@
   "Return base url of current page"
   (let [url (.getCurrentUrl *driver*)]
     (re-find #"\w+:/+[^/]+" url)))
+
+
+(defn execute-javascript [script & args]
+  (.executeScript *driver* script (into-array args)))
 
 
 (defmacro open-popup
