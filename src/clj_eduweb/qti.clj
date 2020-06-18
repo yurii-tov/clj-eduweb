@@ -46,6 +46,9 @@
 (defmulti interaction-value :itype)
 
 
+(defmethod interaction-value :default [i])
+
+
 (defmethod interaction-value :select [i]
   (get-attribute (:element i) "value"))
 
@@ -61,6 +64,9 @@
 
 
 (defmulti interaction-fill (fn [i _] (:itype i)))
+
+
+(defmethod interaction-fill :default [i _])
 
 
 (defmethod interaction-fill :select [i answer]
@@ -98,7 +104,7 @@
 
 (defn store-answer [storage]
   (show-answer)
-  (Thread/sleep 200)
+  (Thread/sleep 1000)
   (assoc storage
          (:path *qti-frame*)
          (mapv interaction-value

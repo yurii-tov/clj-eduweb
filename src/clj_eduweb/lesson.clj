@@ -50,13 +50,16 @@
   (let [frame (qti/find-qti-frame)]
     (qti/with-qti-frame frame
       (qti/fill-answer @answers)
+      (Thread/sleep 200)
       (qti/submit))
+    (Thread/sleep 1000)
     (move-forward frame)))
 
 
 (defn store-answers []
   (reset! answers {})
   (while (store-answer))
+  (complete-and-restart)
   @answers)
 
 
