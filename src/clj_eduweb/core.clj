@@ -152,6 +152,12 @@
   (.get *driver* url))
 
 
+(defn get-base-url []
+  "Return base url of current page"
+  (let [url (.getCurrentUrl *driver*)]
+    (re-find #"\w+:/+[^/]+" url)))
+
+
 (defmacro open-popup
   "Save current set of opened windows, then perform body (assuming new opened windows), then return set of newly opened windows"
   [& body]
