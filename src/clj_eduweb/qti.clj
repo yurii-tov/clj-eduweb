@@ -106,12 +106,9 @@
                {:itype i-type :element element})))))
 
 
-(defmulti interaction-value
-  "Extract values from interaction element"
-  :itype)
-
-
-(defmethod interaction-value :default [_])
+(defmulti interaction-parse-answer
+  "Convert raw text answer to more convinient form"
+  (fn [i _] (:itype i)))
 
 
 (defmulti interaction-fill
@@ -122,20 +119,7 @@
 (defmethod interaction-fill :default [_])
 
 
-(defmulti interaction-parse-answer
-  "Convert raw text answer to more convinient form"
-  (fn [i _] (:itype i)))
-
-
-(defmethod interaction-parse-answer :default
-  [_ answer] answer)
-
-
 ;;;; Text input
-
-
-(defmethod interaction-value :text-input [i]
-  (get-attribute (:element i) "value"))
 
 
 (defmethod interaction-fill :text-input [i answer]
@@ -149,10 +133,8 @@
 ;;;; Choice
 
 
-(defmethod interaction-value :choice [i]
-  (set (map (fn [x] (get-attribute x "value"))
-            (find-elements (:element i)
-                           (css "input[checked]")))))
+(defmethod interaction-parse-answer :choice
+  [_ answer] answer)
 
 
 (defmethod interaction-fill :choice [i answer]
@@ -182,10 +164,6 @@
 ;;;; Select
 
 
-(defmethod interaction-value :select [i]
-  (get-attribute (:element i) "value"))
-
-
 (defmethod interaction-parse-answer :select
   [_ answer] (first answer))
 
@@ -205,27 +183,12 @@
   (click (find-element (css "#commit-button"))))
 
 
-(defn store-answer [storage]
-  (show-answer)
-  (Thread/sleep 1000)
-  (assoc storage
-         (:path *qti-frame*)
-         (mapv interaction-value
-               (find-interactions))))
-
-
-(defn fill-answer
-  ([storage]
-   (when-let [answer (-> *qti-frame* :path storage)]
-     (dorun (map interaction-fill
-                 (find-interactions)
-                 answer))))
-  ([]
-   (dorun (map (fn [i a] (interaction-fill
-                          i
-                          (interaction-parse-answer i a)))
-               (find-interactions)
-               (peek-answer)))))
+(defn fill-answer []
+  (dorun (map (fn [i a] (interaction-fill
+                         i
+                         (interaction-parse-answer i a)))
+              (find-interactions)
+              (peek-answer))))
 
 
 (defn solve []
