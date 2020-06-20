@@ -41,6 +41,18 @@
 ;; Extract question data
 
 
+(declare fetch-data
+         parse-data
+         extract-responses)
+
+
+(defn peek-answer []
+  "High-level api for obtaining answer for given question"
+  (-> (fetch-data)
+      (parse-data)
+      (extract-responses)))
+
+
 (defn fetch-data []
   "Obtain question raw xml"
   (execute-javascript
@@ -89,16 +101,29 @@
                {:itype i-type :element element})))))
 
 
-(defmulti interaction-value :itype)
+(defmulti interaction-value
+  "Extract values from interaction element"
+  :itype)
 
 
-(defmulti interaction-fill (fn [i _] (:itype i)))
+(defmethod interaction-value :default [_])
 
 
-(defmethod interaction-value :default [i])
+(defmulti interaction-fill
+  "Input provided answer to interaction"
+  (fn [i _] (:itype i)))
 
 
-(defmethod interaction-fill :default [i _])
+(defmethod interaction-fill :default [_])
+
+
+(defmulti interaction-parse-answer
+  "Convert raw text answer to more convinient form"
+  (fn [i _] (:itype i)))
+
+
+(defmethod interaction-parse-answer :default
+  [_ answer] answer)
 
 
 ;;;; Text input
