@@ -6,7 +6,7 @@
            org.openqa.selenium.WebElement))
 
 
-;; Qti base elements
+;; Context handling
 
 
 (def ^{:dynamic true} *qti-frame*)
@@ -38,7 +38,7 @@
   (find-element (css "#main-panel")))
 
 
-;; Extract question data
+;; Peek question data
 
 
 (declare fetch-data
@@ -97,7 +97,7 @@
     (mapv responses interactions)))
 
 
-;; Qti contents (interactions)
+;; Interaction-level API
 
 
 (defn find-interactions []
@@ -174,7 +174,7 @@
   (.selectByVisibleText (new Select (:element i)) answer))
 
 
-;; Qti control elements
+;; Question-level API
 
 
 (defn show-answer []
@@ -183,13 +183,6 @@
 
 (defn submit []
   (click (find-element (css "#commit-button"))))
-
-
-(defn move-forward []
-  (click (find-element (css "#next-button"))))
-
-
-;; Content testing
 
 
 (defn store-answer [storage]
@@ -201,8 +194,25 @@
                (find-interactions))))
 
 
-(defn fill-answer [storage]
-  (when-let [answer (-> *qti-frame* :path storage)]
-    (dorun (map interaction-fill
-                (find-interactions)
-                answer))))
+(defn fill-answer
+  ([storage]
+   (when-let [answer (-> *qti-frame* :path storage)]
+     (dorun (map interaction-fill
+                 (find-interactions)
+                 answer))))
+  ([]
+   (dorun (map (fn [i a] (interaction-fill
+                          i
+                          (interaction-parse-answer i a)))
+               (find-interactions)
+               (peek-answer)))))
+
+
+(defn solve []
+  (fill-answer)
+  (Thread/sleep 500)
+  (submit))
+
+
+(defn move-forward []
+  (click (find-element (css "#next-button"))))
