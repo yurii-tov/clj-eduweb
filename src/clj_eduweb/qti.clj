@@ -1,5 +1,7 @@
 (ns clj-eduweb.qti
-  (:require [clj-eduweb.core :refer :all])
+  (:require [clj-eduweb.core :refer :all]
+            [clojure.xml :as xml]
+            [clojure.java.io :as io])
   (:import org.openqa.selenium.support.ui.Select
            org.openqa.selenium.WebElement))
 
@@ -34,6 +36,42 @@
 (defn find-qti-main-panel
   []
   (find-element (css "#main-panel")))
+
+
+;; Extract question data
+
+
+(defn fetch-data []
+  (execute-javascript
+   (format "return (await fetch('%s/%s').then(r => r.text()))"
+           (get-base-url)
+           (:path *qti-frame*))))
+
+
+(defn parse-data [raw-xml]
+  (with-open [is (io/input-stream
+                  (.getBytes raw-xml "utf-8"))]
+    (xml/parse is)))
+
+
+(defn extract-responses [raw-xml]
+  (let [xml-doc (parse-data raw-xml)
+        responses (->> xml-doc
+                       :content
+                       (filter (comp #{:responseDeclaration} :tag)))]
+    (->> responses
+         (map (juxt (comp :identifier :attrs)
+                    (fn [r] (->> (:content r)
+                                 (filter (comp #{:correctResponse} :tag))
+                                 first
+                                 :content
+                                 (map (comp first :content))))))
+         (map (fn [[identifier correct-responses]]
+                (vector identifier
+                        (if (> (count correct-responses) 1)
+                          (vec correct-responses)
+                          (first correct-responses)))))
+         (into {}))))
 
 
 ;; Qti contents (interactions)
@@ -113,16 +151,6 @@
 
 (defn move-forward []
   (click (find-element (css "#next-button"))))
-
-
-;; Fetch question data
-
-
-(defn fetch-data []
-  (execute-javascript
-   (format "return (await fetch('%s/%s').then(r => r.text()))"
-           (get-base-url)
-           (:path *qti-frame*))))
 
 
 ;; Content testing
