@@ -186,6 +186,10 @@
   (get-attribute (:element i) "value"))
 
 
+(defmethod interaction-parse-answer :select
+  [_ answer] (first answer))
+
+
 (defmethod interaction-fill :select [i answer]
   (.selectByVisibleText (new Select (:element i)) answer))
 
