@@ -101,7 +101,8 @@
       (doall (for [[i-type selector] {:choice ".choice-interaction"
                                       :text-input "input[type=text]"
                                       :link ".link-interaction"
-                                      :select "select.inline-choice"}
+                                      :select "select.inline-choice"
+                                      :order ".order-interaction"}
                    element (find-elements p (css selector))]
                {:itype i-type :element element})))))
 
@@ -109,6 +110,10 @@
 (defmulti interaction-parse-answer
   "Convert raw text answer to more convinient form"
   (fn [i _] (:itype i)))
+
+
+(defmethod interaction-parse-answer :default
+  [_ answer] answer)
 
 
 (defmulti interaction-fill
@@ -131,10 +136,6 @@
 
 
 ;;;; Choice
-
-
-(defmethod interaction-parse-answer :choice
-  [_ answer] answer)
 
 
 (defmethod interaction-fill :choice [i answer]
@@ -170,6 +171,19 @@
 
 (defmethod interaction-fill :select [i answer]
   (.selectByVisibleText (new Select (:element i)) answer))
+
+
+;;;; Order
+
+
+(defmethod interaction-fill :order [i answer]
+  (dorun (map (fn [i x]
+                (let [items (find-elements (css ".order-interaction-item"))
+                      element (find-element (css (format ".order-interaction-item-%s" x)))]
+                  (click element)
+                  (click (items i))))
+              (range)
+              answer)))
 
 
 ;; Question-level API
