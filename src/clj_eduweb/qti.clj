@@ -1,6 +1,7 @@
 (ns clj-eduweb.qti
   (:require [clj-eduweb.core :refer :all]
             [clojure.xml :as xml]
+            [clojure.zip :as zip]
             [clojure.java.io :as io])
   (:import org.openqa.selenium.support.ui.Select
            org.openqa.selenium.WebElement))
@@ -72,13 +73,11 @@
   "Get responses data from parsed xml document
    Return vector of responses
    (One response for interaction)"
-  (let [interactions  (->> xml-doc
-                           :content
-                           (filter (comp #{:itemBody} :tag))
-                           first
-                           :content
-                           (mapcat :content)
-                           (map (comp :responseIdentifier :attrs)))
+  (let [interactions (->> xml-doc
+                          zip/xml-zip
+                          (iterate zip/next)
+                          (take-while (complement zip/end?))
+                          (keep (comp :responseIdentifier :attrs zip/node)))
         responses (->> xml-doc
                        :content
                        (filter (comp #{:responseDeclaration} :tag))
