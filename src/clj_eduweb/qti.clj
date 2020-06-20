@@ -46,15 +46,27 @@
 (defmulti interaction-value :itype)
 
 
+(defmulti interaction-fill (fn [i _] (:itype i)))
+
+
 (defmethod interaction-value :default [i])
 
 
-(defmethod interaction-value :select [i]
-  (get-attribute (:element i) "value"))
+(defmethod interaction-fill :default [i _])
+
+
+;;;; Text input
 
 
 (defmethod interaction-value :text-input [i]
   (get-attribute (:element i) "value"))
+
+
+(defmethod interaction-fill :text-input [i answer]
+  (send-keys (:element i) answer))
+
+
+;;;; Choice
 
 
 (defmethod interaction-value :choice [i]
@@ -63,25 +75,22 @@
                            (css "input[checked]")))))
 
 
-(defmulti interaction-fill (fn [i _] (:itype i)))
-
-
-(defmethod interaction-fill :default [i _])
-
-
-(defmethod interaction-fill :select [i answer]
-  (.selectByVisibleText (new Select (:element i)) answer))
-
-
-(defmethod interaction-fill :text-input [i answer]
-  (send-keys (:element i) answer))
-
-
 (defmethod interaction-fill :choice [i answer]
   (->> (find-elements (:element i) (css "input"))
        (filter (comp answer (fn [x] (get-attribute x "value"))))
        (map click)
        dorun))
+
+
+;;;; Select
+
+
+(defmethod interaction-value :select [i]
+  (get-attribute (:element i) "value"))
+
+
+(defmethod interaction-fill :select [i answer]
+  (.selectByVisibleText (new Select (:element i)) answer))
 
 
 ;; Qti control elements
