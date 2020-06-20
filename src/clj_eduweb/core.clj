@@ -146,20 +146,19 @@
 ;; browser control
 
 
-(defn get-url
-  "Navigate browser to given url"
-  [url]
-  (.get *driver* url))
-
-
 (defn get-base-url []
   "Return base url of current page"
   (let [url (.getCurrentUrl *driver*)]
     (re-find #"\w+:/+[^/]+" url)))
 
 
-(defn execute-javascript [script & args]
-  (.executeScript *driver* script (into-array args)))
+(defn open-url
+  "Navigate browser to given url.
+  Relative urls (starting with \"/\") also supported"
+  [url]
+  (if (cstr/starts-with? url "/")
+    (open-url (format "%s%s" (get-base-url) url))
+    (.get *driver* url)))
 
 
 (defmacro open-popup
@@ -169,6 +168,10 @@
      (do ~@body)
      (cset/difference (set (.. *driver* ~'getWindowHandles))
                       popups#)))
+
+
+(defn execute-javascript [script & args]
+  (.executeScript *driver* script (into-array args)))
 
 
 ;; take screenshots
