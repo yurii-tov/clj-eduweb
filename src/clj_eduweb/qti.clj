@@ -69,22 +69,32 @@
 
 
 (defn extract-responses [xml-doc]
-  "Get responses data from parsed xml document"
-  (->> xml-doc
-       :content
-       (filter (comp #{:responseDeclaration} :tag))
-       (map (juxt (comp :identifier :attrs)
-                  (fn [r] (->> (:content r)
-                               (filter (comp #{:correctResponse} :tag))
-                               first
-                               :content
-                               (map (comp first :content))))))
-       (map (fn [[identifier correct-responses]]
-              (vector identifier
-                      (if (> (count correct-responses) 1)
-                        (vec correct-responses)
-                        (first correct-responses)))))
-       (into {})))
+  "Get responses data from parsed xml document
+   Return vector of responses
+   (One response for interaction)"
+  (let [interactions  (->> xml-doc
+                           :content
+                           (filter (comp #{:itemBody} :tag))
+                           first
+                           :content
+                           (mapcat :content)
+                           (map (comp :responseIdentifier :attrs)))
+        responses (->> xml-doc
+                       :content
+                       (filter (comp #{:responseDeclaration} :tag))
+                       (map (juxt (comp :identifier :attrs)
+                                  (fn [r] (->> (:content r)
+                                               (filter (comp #{:correctResponse} :tag))
+                                               first
+                                               :content
+                                               (map (comp first :content))))))
+                       (map (fn [[identifier correct-responses]]
+                              (vector identifier
+                                      (if (> (count correct-responses) 1)
+                                        (vec correct-responses)
+                                        (first correct-responses)))))
+                       (into {}))]
+    (mapv responses interactions)))
 
 
 ;; Qti contents (interactions)
