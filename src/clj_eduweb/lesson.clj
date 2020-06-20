@@ -35,39 +35,18 @@
   (start-again))
 
 
-;; Content testing
+;; Questions controls
 
 
-(def answers (atom {}))
-
-
-(defn store-answer []
-  "Store answer for current qti question, jump to the next one"
-  (let [frame (qti/find-qti-frame)]
-    (qti/with-qti-frame-explicit
-      frame
-      (swap! answers qti/store-answer))
-    (move-forward frame)))
-
-
-(defn fill-answer []
-  "Plug stored answer into current question, jump to the next one"
+(defn solve-question []
+  "Plug answer into current question, jump to the next one"
   (let [frame (qti/find-qti-frame)]
     (qti/with-qti-frame-explicit frame
-      (qti/fill-answer @answers)
-      (Thread/sleep 200)
-      (qti/submit))
+      (qti/solve))
     (Thread/sleep 1000)
     (move-forward frame)))
 
 
-(defn store-answers []
-  (reset! answers {})
-  (while (store-answer))
-  (complete-and-restart)
-  @answers)
-
-
-(defn fill-answers []
-  (while (fill-answer))
+(defn solve []
+  (while (solve-question))
   (complete))
