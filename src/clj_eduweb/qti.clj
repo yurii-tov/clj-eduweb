@@ -142,6 +142,10 @@
   (send-keys (:element i) answer))
 
 
+(defmethod interaction-parse-answer :text-input
+  [_ answer] (first answer))
+
+
 ;;;; Choice
 
 
