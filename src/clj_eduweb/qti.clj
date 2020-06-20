@@ -152,8 +152,10 @@
 
 
 (defmethod interaction-fill :choice [i answer]
-  (->> (find-elements (:element i) (css "input"))
-       (filter (comp answer (fn [x] (get-attribute x "value"))))
+  (->> answer
+       (map (fn [a] (find-element
+                     (:element i)
+                     (css (format "input[value=%s]" a)))))
        (map click)
        dorun))
 
