@@ -164,6 +164,21 @@
        dorun))
 
 
+;;;; Link
+
+
+(defmethod interaction-parse-answer :link [i answer]
+  (->> answer
+       (map (fn [x] (cstr/split x #" ")))
+       (into {})))
+
+
+(defmethod interaction-fill :link [i answer]
+  (doseq [xs answer
+          x xs]
+    (click (find-element (css (format ".match-interaction-item-%s" x))))))
+
+
 ;;;; Select
 
 
