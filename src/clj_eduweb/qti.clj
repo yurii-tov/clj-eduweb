@@ -86,14 +86,10 @@
                                                (filter (comp #{:correctResponse} :tag))
                                                first
                                                :content
-                                               (map (comp first :content))))))
-                       (map (fn [[identifier correct-responses]]
-                              (vector identifier
-                                      (if (> (count correct-responses) 1)
-                                        (vec correct-responses)
-                                        (first correct-responses)))))
+                                               (mapv (comp first :content))))))
                        (into {}))]
     (mapv responses interactions)))
+
 
 
 ;; Interaction-level API
