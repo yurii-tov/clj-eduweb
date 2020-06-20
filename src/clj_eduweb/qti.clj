@@ -14,7 +14,8 @@
   (find-element (css "[name=qti-player-frame]")))
 
 
-(defmacro with-qti-frame [frame & body]
+(defmacro with-qti-frame-explicit
+  [frame & body]
   `(let [frame# ~frame]
      (binding [*qti-frame* {:element frame#
                             :src (get-attribute frame# "src")
@@ -22,6 +23,12 @@
                                            (get-attribute frame# "src"))}]
        (with-frame frame#
          ~@body))))
+
+
+(defmacro with-qti-frame [& body]
+  `(with-qti-frame-explicit
+     (find-qti-frame)
+     ~@body))
 
 
 (defn find-qti-main-panel

@@ -3,8 +3,12 @@
             [clj-eduweb.qti :as qti]))
 
 
+;; Lesson runtime controls
+
+
 (defn move-forward [frame]
-  (try (qti/with-qti-frame frame
+  (try (qti/with-qti-frame-explicit
+         frame
          (with-driver-config {:implicit-wait 0}
            (qti/move-forward)))
        (wait-for (condition (stale? frame)))
@@ -40,7 +44,8 @@
 (defn store-answer []
   "Store answer for current qti question, jump to the next one"
   (let [frame (qti/find-qti-frame)]
-    (qti/with-qti-frame frame
+    (qti/with-qti-frame-explicit
+      frame
       (swap! answers qti/store-answer))
     (move-forward frame)))
 
@@ -48,7 +53,7 @@
 (defn fill-answer []
   "Plug stored answer into current question, jump to the next one"
   (let [frame (qti/find-qti-frame)]
-    (qti/with-qti-frame frame
+    (qti/with-qti-frame-explicit frame
       (qti/fill-answer @answers)
       (Thread/sleep 200)
       (qti/submit))
