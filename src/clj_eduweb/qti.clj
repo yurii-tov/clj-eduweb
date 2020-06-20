@@ -42,6 +42,7 @@
 
 
 (defn fetch-data []
+  "Obtain question raw xml"
   (execute-javascript
    (format "return (await fetch('%s/%s').then(r => r.text()))"
            (get-base-url)
@@ -49,29 +50,29 @@
 
 
 (defn parse-data [raw-xml]
+  "Parse question xml into clojure data"
   (with-open [is (io/input-stream
                   (.getBytes raw-xml "utf-8"))]
     (xml/parse is)))
 
 
-(defn extract-responses [raw-xml]
-  (let [xml-doc (parse-data raw-xml)
-        responses (->> xml-doc
-                       :content
-                       (filter (comp #{:responseDeclaration} :tag)))]
-    (->> responses
-         (map (juxt (comp :identifier :attrs)
-                    (fn [r] (->> (:content r)
-                                 (filter (comp #{:correctResponse} :tag))
-                                 first
-                                 :content
-                                 (map (comp first :content))))))
-         (map (fn [[identifier correct-responses]]
-                (vector identifier
-                        (if (> (count correct-responses) 1)
-                          (vec correct-responses)
-                          (first correct-responses)))))
-         (into {}))))
+(defn extract-responses [xml-doc]
+  "Get responses data from parsed xml document"
+  (->> xml-doc
+       :content
+       (filter (comp #{:responseDeclaration} :tag))
+       (map (juxt (comp :identifier :attrs)
+                  (fn [r] (->> (:content r)
+                               (filter (comp #{:correctResponse} :tag))
+                               first
+                               :content
+                               (map (comp first :content))))))
+       (map (fn [[identifier correct-responses]]
+              (vector identifier
+                      (if (> (count correct-responses) 1)
+                        (vec correct-responses)
+                        (first correct-responses)))))
+       (into {})))
 
 
 ;; Qti contents (interactions)
