@@ -188,6 +188,22 @@
               answer)))
 
 
+;;;; Container
+
+
+(defmethod interaction-parse-answer :container
+  [_ answer] (map (fn [x] (cstr/split x #" "))
+                  answer))
+
+
+(defmethod interaction-fill :container [i answer]
+  (doseq [[x c] answer
+          :let [container (find-element (css (format ".match-interaction-container-%s .panel-heading" c)))
+                item (find-element (css (format ".match-interaction-item-%s" x)))]]
+    (click item)
+    (click container)))
+
+
 ;; Question-level API
 
 
