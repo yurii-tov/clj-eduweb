@@ -44,7 +44,7 @@
   (let [frame (qti/find-qti-frame)]
     (qti/with-qti-frame-explicit frame
       (qti/solve))
-    (Thread/sleep 1000)
+    (Thread/sleep 500)
     (move-forward frame)))
 
 
