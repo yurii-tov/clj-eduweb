@@ -100,7 +100,7 @@
   (let [p (find-qti-main-panel)]
     (with-driver-config {:implicit-wait 0}
       (doall (for [[i-type selector] {:choice ".choice-interaction"
-                                      :text-input "input[type=text]"
+                                      :text-input "input.text-entry"
                                       :link ".link-interaction"
                                       :select "select.inline-choice"
                                       :order ".order-interaction"}
