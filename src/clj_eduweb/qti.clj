@@ -2,6 +2,7 @@
   (:require [clj-eduweb.core :refer :all]
             [clojure.xml :as xml]
             [clojure.zip :as zip]
+            [clojure.string :as cstr]
             [clojure.java.io :as io])
   (:import org.openqa.selenium.support.ui.Select
            org.openqa.selenium.WebElement))
