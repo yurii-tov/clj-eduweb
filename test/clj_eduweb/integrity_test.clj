@@ -4,6 +4,7 @@
             [clj-eduweb.qti :as qti]
             [clj-eduweb.lesson :as lesson]
             [clj-eduweb.administration :as administration]
+            [clj-eduweb.journal :as journal]
             [clj-eduweb.repl :as repl]
             [clojure.test :refer :all]))
 
