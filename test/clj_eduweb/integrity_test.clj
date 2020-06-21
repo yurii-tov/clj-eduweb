@@ -10,4 +10,4 @@
 
 
 (deftest all-compiling
-  (println "All ns compiling successfully"))
+  (println "All ns compiled successfully"))
