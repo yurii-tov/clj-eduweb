@@ -21,6 +21,7 @@
 
 
 (defn start []
+  "Start from lesson main page"
   (click (find-element (css "#btnStartLesson"))))
 
 
@@ -48,5 +49,6 @@
 
 
 (defn solve []
+  "Solve all questions in lesson, return final score"
   (while (solve-question))
   (complete))
