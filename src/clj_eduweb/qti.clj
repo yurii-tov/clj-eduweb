@@ -99,12 +99,13 @@
 (defn find-interactions []
   (let [p (find-qti-main-panel)]
     (with-driver-config {:implicit-wait 0}
-      (doall (for [[i-type selector] {:choice ".choice-interaction"
-                                      :text-input "input.text-entry"
-                                      :link ".link-interaction"
-                                      :select "select.inline-choice"
-                                      :order ".order-interaction"}
-                   element (find-elements p (css selector))]
+      (doall (for [[i-type selector] {:choice (css ".choice-interaction")
+                                      :text-input (css "input.text-entry")
+                                      :link (css ".link-interaction")
+                                      :select (css "select.inline-choice")
+                                      :order (css ".order-interaction")
+                                      :container (xpath ".//table[./tbody/tr/td/div/div[contains(@class, 'match-interaction-container')]]")}
+                   element (find-elements p selector)]
                {:itype i-type :element element})))))
 
 
