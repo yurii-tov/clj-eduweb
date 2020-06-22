@@ -43,18 +43,6 @@
 ;; Peek question data
 
 
-(declare fetch-data
-         parse-data
-         extract-responses)
-
-
-(defn peek-answer []
-  "High-level api for obtaining answer for given question"
-  (-> (fetch-data)
-      (parse-data)
-      (extract-responses)))
-
-
 (defn fetch-data []
   "Obtain question raw xml"
   (execute-javascript
@@ -70,41 +58,45 @@
     (xml/parse is)))
 
 
-(defn extract-interactions [xml-doc]
-  "Extract interaction from QTI xml data"
-  (->> xml-doc
-       zip/xml-zip
-       (iterate zip/next)
-       (take-while (complement zip/end?))
-       (map zip/node)
-       (filter (comp :responseIdentifier :attrs))))
-
-
-(defn extract-responses [xml-doc]
-  "Get responses data from parsed xml document
-   Return vector of responses
-   (One response for interaction)"
-  (let [interactions (->> xml-doc
-                          extract-interactions
-                          (map (comp :responseIdentifier :attrs)))
-        responses (->> xml-doc
-                       :content
-                       (filter (comp #{:responseDeclaration} :tag))
-                       (map (juxt (comp :identifier :attrs)
-                                  (fn [r] (->> (:content r)
-                                               (filter (comp #{:correctResponse} :tag))
-                                               first
-                                               :content
-                                               (mapv (comp first :content))))))
-                       (into {}))]
-    (mapv responses interactions)))
-
+(defn extract-interactions
+  ([xml-doc]
+   "Extract meaningful parts from given qti data:
+   - Right answers
+   - Interactions source
+   Return vector of
+   {:answer [...]
+    :source {:tag ...
+             :content ...
+             :attrs ...}}"
+   (let [interactions (->> xml-doc
+                           zip/xml-zip
+                           (iterate zip/next)
+                           (take-while (complement zip/end?))
+                           (map zip/node)
+                           (filter (comp :responseIdentifier :attrs)))
+         responses (->> xml-doc
+                        :content
+                        (filter (comp #{:responseDeclaration} :tag))
+                        (map (juxt (comp :identifier :attrs)
+                                   (fn [r] (->> (:content r)
+                                                (filter (comp #{:correctResponse} :tag))
+                                                first
+                                                :content
+                                                (mapv (comp first :content))))))
+                        (into {}))]
+     (mapv (fn [i] {:answer (responses (-> i :attrs :responseIdentifier))
+                    :source i})
+           interactions)))
+  ([] (-> (fetch-data)
+          parse-data
+          extract-interactions)))
 
 
 ;; Interaction-level API
 
 
 (defn find-interactions []
+  "Find interactions WebElements in the DOM"
   (let [p (find-qti-main-panel)]
     (with-driver-config {:implicit-wait 0}
       (doall (for [[i-type selector] {:choice (css ".choice-interaction")
@@ -117,13 +109,13 @@
                {:itype i-type :element element})))))
 
 
-(defmulti interaction-parse-answer
-  "Convert raw text answer to more convinient form"
+(defmulti interaction-derive-answer
+  "Make interaction-specific answer data structure"
   (fn [i _] (:itype i)))
 
 
-(defmethod interaction-parse-answer :default
-  [_ answer] answer)
+(defmethod interaction-derive-answer :default
+  [_ {:keys [answer]}] answer)
 
 
 (defmulti interaction-fill
@@ -141,8 +133,8 @@
   (send-keys (:element i) answer))
 
 
-(defmethod interaction-parse-answer :text-input
-  [_ answer] (first answer))
+(defmethod interaction-derive-answer :text-input
+  [_ {:keys [answer]}] (first answer))
 
 
 ;;;; Choice
@@ -160,7 +152,7 @@
 ;;;; Link
 
 
-(defmethod interaction-parse-answer :link [i answer]
+(defmethod interaction-derive-answer :link [_ {:keys [answer]}]
   (map (fn [x] (cstr/split x #" "))
        answer))
 
@@ -174,8 +166,8 @@
 ;;;; Select
 
 
-(defmethod interaction-parse-answer :select
-  [_ answer] (first answer))
+(defmethod interaction-derive-answer :select
+  [_ {:keys [answer]}] (first answer))
 
 
 (defmethod interaction-fill :select [i answer]
@@ -198,7 +190,7 @@
 ;;;; Container
 
 
-(defmethod interaction-parse-answer :container [_ answer]
+(defmethod interaction-derive-answer :container [_ {:keys [answer]}]
   (map (fn [x] (cstr/split x #" "))
        answer))
 
@@ -223,11 +215,11 @@
 
 
 (defn fill-answer []
-  (dorun (map (fn [i a] (interaction-fill
+  (dorun (map (fn [i d] (interaction-fill
                          i
-                         (interaction-parse-answer i a)))
+                         (interaction-derive-answer i d)))
               (find-interactions)
-              (peek-answer))))
+              (extract-interactions))))
 
 
 (defn solve []
