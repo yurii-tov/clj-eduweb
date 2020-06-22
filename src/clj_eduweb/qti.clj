@@ -40,7 +40,7 @@
   (find-element (css "#main-panel")))
 
 
-;; Peek question data
+;; Parse qti source
 
 
 (defn fetch-data []
