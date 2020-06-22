@@ -70,15 +70,23 @@
     (xml/parse is)))
 
 
+(defn extract-interactions [xml-doc]
+  "Extract interaction from QTI xml data"
+  (->> xml-doc
+       zip/xml-zip
+       (iterate zip/next)
+       (take-while (complement zip/end?))
+       (map zip/node)
+       (filter (comp :responseIdentifier :attrs))))
+
+
 (defn extract-responses [xml-doc]
   "Get responses data from parsed xml document
    Return vector of responses
    (One response for interaction)"
   (let [interactions (->> xml-doc
-                          zip/xml-zip
-                          (iterate zip/next)
-                          (take-while (complement zip/end?))
-                          (keep (comp :responseIdentifier :attrs zip/node)))
+                          extract-interactions
+                          (map (comp :responseIdentifier :attrs)))
         responses (->> xml-doc
                        :content
                        (filter (comp #{:responseDeclaration} :tag))
