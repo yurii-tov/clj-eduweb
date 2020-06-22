@@ -172,7 +172,11 @@
 
 
 (defmethod interaction-derive-answer :select
-  [_ {:keys [answer]}] (first answer))
+  [_ {[a] :answer
+      {content :content} :source}]
+  (->> content
+       (filter (comp #{a} :identifier :attrs))
+       ((comp first :content first))))
 
 
 (defmethod interaction-fill :select [i answer]
