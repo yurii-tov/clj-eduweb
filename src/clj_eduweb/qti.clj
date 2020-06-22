@@ -153,9 +153,8 @@
 
 
 (defmethod interaction-parse-answer :link [i answer]
-  (->> answer
-       (map (fn [x] (cstr/split x #" ")))
-       (into {})))
+  (map (fn [x] (cstr/split x #" "))
+       answer))
 
 
 (defmethod interaction-fill :link [i answer]
@@ -191,9 +190,9 @@
 ;;;; Container
 
 
-(defmethod interaction-parse-answer :container
-  [_ answer] (map (fn [x] (cstr/split x #" "))
-                  answer))
+(defmethod interaction-parse-answer :container [_ answer]
+  (map (fn [x] (cstr/split x #" "))
+       answer))
 
 
 (defmethod interaction-fill :container [i answer]
