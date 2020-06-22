@@ -18,13 +18,15 @@
   (find-element (css "[name=qti-player-frame]")))
 
 
+(defn extract-qti-path [url]
+  (re-find #"(?<=\?path=)[^&]+" url))
+
+
 (defmacro with-qti-frame-explicit
   [frame & body]
   `(let [frame# ~frame]
-     (binding [*qti-frame* {:element frame#
-                            :src (get-attribute frame# "src")
-                            :path (re-find #"(?<=\?path=)[^&]+"
-                                           (get-attribute frame# "src"))}]
+     (binding [*qti-frame*
+               {:src (get-attribute frame# "src")}]
        (with-frame frame#
          ~@body))))
 
@@ -48,7 +50,10 @@
   (execute-javascript
    (format "return (await fetch('%s/%s').then(r => r.text()))"
            (get-base-url)
-           (:path *qti-frame*))))
+           (extract-qti-path
+            (or (:src *qti-frame*)
+                (.getCurrentUrl *driver*))))))
+
 
 
 (defn parse-data [raw-xml]
