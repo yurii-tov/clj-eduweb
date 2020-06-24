@@ -42,10 +42,10 @@
   (find-element (css "#main-panel")))
 
 
-;; Parse qti source
+;; Obtain qti source
 
 
-(defn fetch-data []
+(defn fetch-source []
   "Obtain question raw xml"
   (execute-javascript
    (format "return (await fetch('%s/%s').then(r => r.text()))"
@@ -55,9 +55,8 @@
                 (.getCurrentUrl *driver*))))))
 
 
-
-(defn parse-data [raw-xml]
-  "Parse question xml into clojure data"
+(defn parse-source [raw-xml]
+  "Read qti xml into clojure data"
   (with-open [is (io/input-stream
                   (.getBytes raw-xml "utf-8"))]
     (xml/parse is)))
@@ -92,8 +91,8 @@
      (mapv (fn [i] {:answer (responses (-> i :attrs :responseIdentifier))
                     :source i})
            interactions)))
-  ([] (-> (fetch-data)
-          parse-data
+  ([] (-> (fetch-source)
+          parse-source
           extract-interactions)))
 
 
@@ -105,7 +104,10 @@
    Order found interactions by provided list of tag names,
    e.g. [:inlineChoiceInteraction
          :inlineChoiceInteraction
-         :simpleChoice]"
+         :simpleChoice].
+  Return vector of hashmaps like (for example)
+  {:element ...
+   :type :choice}"
   (let [selectors {:choice (css ".choice-interaction")
                    :text-input (css "input.text-entry")
                    :link (css ".link-interaction")
@@ -140,7 +142,7 @@
                  (assoc result
                         interaction-type (inc element-index)
                         :interactions (conj interactions
-                                            {:itype interaction-type
+                                            {:type interaction-type
                                              :element element}))))
              {:interactions []}
              (map tag-translation
@@ -150,7 +152,7 @@
 
 (defmulti interaction-derive-answer
   "Make interaction-specific answer data structure"
-  (fn [i _] (:itype i)))
+  (fn [i _] (:type i)))
 
 
 (defmethod interaction-derive-answer :default
@@ -159,7 +161,7 @@
 
 (defmulti interaction-fill
   "Input provided answer to interaction"
-  (fn [i _] (:itype i)))
+  (fn [i _] (:type i)))
 
 
 (defmethod interaction-fill :default [_])
