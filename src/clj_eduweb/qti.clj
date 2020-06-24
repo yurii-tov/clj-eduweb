@@ -62,7 +62,7 @@
     (xml/parse is)))
 
 
-(defn extract-interactions
+(defn peek-source
   ([xml-doc]
    "Extract meaningful parts from given qti data:
    - Right answers
@@ -93,7 +93,7 @@
            interactions)))
   ([] (-> (fetch-source)
           parse-source
-          extract-interactions)))
+          peek-source)))
 
 
 ;; Interaction-level API
@@ -260,7 +260,7 @@
 
 
 (defn fill-answer []
-  (let [interactions-data (extract-interactions)
+  (let [interactions-data (peek-source)
         interactions-tags (map (comp :tag :source)
                                interactions-data)]
     (dorun (map (fn [interaction data]
