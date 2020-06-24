@@ -100,18 +100,52 @@
 ;; Interaction-level API
 
 
-(defn find-interactions []
-  "Find interactions WebElements in the DOM"
-  (let [p (find-qti-main-panel)]
-    (with-driver-config {:implicit-wait 0}
-      (doall (for [[i-type selector] {:choice (css ".choice-interaction")
-                                      :text-input (css "input.text-entry")
-                                      :link (css ".link-interaction")
-                                      :select (css "select.inline-choice")
-                                      :order (css ".order-interaction")
-                                      :container (xpath ".//table[./tbody/tr/td/div/div[contains(@class, 'match-interaction-container')]]")}
-                   element (find-elements p selector)]
-               {:itype i-type :element element})))))
+(defn find-interactions [interactions-tags]
+  "Find interactions WebElements in the DOM.
+   Order found interactions by provided list of tag names,
+   e.g. [:inlineChoiceInteraction
+         :inlineChoiceInteraction
+         :simpleChoice]"
+  (let [selectors {:choice (css ".choice-interaction")
+                   :text-input (css "input.text-entry")
+                   :link (css ".link-interaction")
+                   :select (css "select.inline-choice")
+                   :order (css ".order-interaction")
+                   :container (xpath ".//table[./tbody/tr/td/div/div[contains(@class, 'match-interaction-container')]]")}
+        tag-translation {:choiceInteraction :choice
+                         :textEntryInteraction :text-input
+                         :inlineChoiceInteraction :select
+                         :orderInteraction :order
+                         :matchInteraction [:container :link]}
+        main-panel (find-qti-main-panel)
+        determine-interaction (fn [[interaction-type & variants]]
+                                (when-not interaction-type
+                                  (throw (new RuntimeException "Unable to determine interaction type")))
+                                (let [found (with-driver-config {:implicit-wait 0}
+                                              (find-elements
+                                               main-panel
+                                               (selectors interaction-type)))]
+                                  (if (seq found)
+                                    [found interaction-type]
+                                    (recur variants))))]
+    ((reduce (fn [result interaction-type]
+               (let [[elements interaction-type]
+                     (if (coll? interaction-type)
+                       (determine-interaction interaction-type)
+                       [(find-elements main-panel (selectors interaction-type))
+                        interaction-type])
+                     element-index (result interaction-type 0)
+                     element (elements element-index)
+                     interactions (result :interactions)]
+                 (assoc result
+                        interaction-type (inc element-index)
+                        :interactions (conj interactions
+                                            {:itype interaction-type
+                                             :element element}))))
+             {:interactions []}
+             (map tag-translation
+                  interactions-tags))
+     :interactions)))
 
 
 (defmulti interaction-derive-answer
@@ -224,11 +258,15 @@
 
 
 (defn fill-answer []
-  (dorun (map (fn [i d] (interaction-fill
-                         i
-                         (interaction-derive-answer i d)))
-              (find-interactions)
-              (extract-interactions))))
+  (let [interactions-data (extract-interactions)
+        interactions-tags (map (comp :tag :source)
+                               interactions-data)]
+    (dorun (map (fn [interaction data]
+                  (interaction-fill
+                   interaction
+                   (interaction-derive-answer interaction data)))
+                (find-interactions interactions-tags)
+                interactions-data))))
 
 
 (defn solve []
