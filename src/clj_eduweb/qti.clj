@@ -254,11 +254,15 @@
 
 
 (defmethod interaction-derive-answer :hottext
-  [_ {a :answer
-      {content :content} :source}]
-  (->> content
-       (filter (comp (set a) :identifier :attrs first :content))
-       (map (comp first :content first :content))
+  [_ {:keys [answer source]}]
+  (->> source
+       zip/xml-zip
+       (iterate zip/next)
+       (take-while (complement zip/end?))
+       (map zip/node)
+       (filter (comp #{:hottext} :tag))
+       (filter (comp (set answer) :identifier :attrs))
+       (map (comp first :content))
        (into #{})))
 
 
