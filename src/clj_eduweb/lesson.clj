@@ -15,6 +15,11 @@
        (catch Exception e)))
 
 
+(defn skip []
+  (qti/with-qti-frame
+    (qti/move-forward)))
+
+
 (defn complete []
   (click (find-element (css "#e4-library-LessonPanel-closeButton")))
   (get-text (find-element (css ".lesson-result-score-value"))))
