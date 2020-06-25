@@ -114,7 +114,7 @@
                    :hottext (css ".hottext-interaction")
                    :select (css "select.inline-choice")
                    :order (css ".order-interaction")
-                   :container (xpath ".//table[descendant::*[contains(@class, 'match-interaction')]]")}
+                   :container (xpath ".//table[descendant::*[contains(@class, 'match-interaction')]]|.//div[descendant::*[contains(@class, 'match-interaction')]]")}
         tag-translation {:choiceInteraction :choice
                          :textEntryInteraction :text-input
                          :inlineChoiceInteraction :select
@@ -244,10 +244,16 @@
 
 (defmethod interaction-fill :container [i answer]
   (doseq [[x c] answer
-          :let [container (find-element (css (format ".match-interaction-container-%1$s .panel-heading, .match-interaction-container-%1$s" c c)))
-                item (find-element (css (format ".match-interaction-items .match-interaction-item-%s" x)))]]
+          :let [container (find-element (:element i)
+                                        (css (format ".match-interaction-container-%s" c)))
+                item (find-element (:element i)
+                                   (css (format ".match-interaction-items .match-interaction-item-%s" x)))]]
     (click item)
-    (click container)))
+    (if-let [heading (first (with-driver-config {:implicit-wait 0}
+                              (find-elements container
+                                             (css ".panel-heading"))))]
+      (click heading)
+      (click container))))
 
 
 ;;;; Hottext
