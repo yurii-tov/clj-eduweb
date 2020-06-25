@@ -40,18 +40,10 @@
 
 
 (defn set-driver!
-  "Mutate *driver* dynamic variable.
-  Return its argument"
+  "Mutate *driver* dynamic variable"
   [driver]
   (alter-var-root (var *driver*)
                   (constantly driver)))
-
-
-(defmacro with-driver
-  "Perform body with *driver* variable bound to driver"
-  [driver & body]
-  `(binding [*driver* ~driver]
-     ~@body))
 
 
 (defn config-driver!
@@ -80,7 +72,9 @@
 
 
 (defmulti start-driver
-  "Configure and start new webdriver instance, mutate *driver* dynamic var (see set-driver!)
+  "Configure and start new webdriver instance,
+   by default mutate *driver* dynamic var (see set-driver!).
+   Return WebDriver instance
    Args: hashmap
    Recognized keys:
    :browser      ; [keyword]           browser type
@@ -90,8 +84,19 @@
    :prefs        ; [map]               'preferences' experimental option
    :capabilities ; [map]               common webdriver settings
    :headless?    ; [boolean]           on/off headless mode
+   :anonymous?   ; [boolean]           do not mutate global *driver* var
    :binary       ; [string]            path to browser executable"
   :browser)
+
+
+(defn startup-config [driver {:keys [url anonymous?] :as options}]
+  "Perform all configurations needed when starting new driver instance.
+   i.e. configure driver itself, set up global settings.
+   Return provided WebDriver instance"
+  (when-not anonymous? (set-driver! driver))
+  (config-driver! driver options)
+  (when url (.get driver url))
+  driver)
 
 
 (defn make-chrome-options
@@ -117,26 +122,21 @@
     chrome-options))
 
 
-(defmethod start-driver :chrome [{:keys [url remote-url] :as options}]
+(defmethod start-driver :chrome
+  [{:keys [remote-url] :as options}]
   (let [chrome-options (make-chrome-options options)
         chromedriver (if remote-url
                        (new RemoteWebDriver (new URL remote-url) chrome-options)
                        (new ChromeDriver chrome-options))]
-    (config-driver! chromedriver options)
-    (when url (.get chromedriver url))
-    (set-driver! chromedriver)))
+    (startup-config chromedriver options)))
 
 
 (defmethod start-driver :firefox
-  [{:keys [url]
-    :as options}]
+  [options]
   (let [firefox-options (new FirefoxOptions)]
     (.setCapability firefox-options "marionette" false)
     (let [firefox-driver (new FirefoxDriver firefox-options)]
-      (config-driver! firefox-driver options)
-      (when url
-        (.get firefox-driver url))
-      (set-driver! firefox-driver))))
+      (startup-config firefox-driver options))))
 
 
 (defn quit-driver []
