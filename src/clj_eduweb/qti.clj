@@ -111,12 +111,14 @@
   (let [selectors {:choice (css ".choice-interaction")
                    :text-input (css "input.text-entry")
                    :link (css ".link-interaction")
+                   :hottext (css ".hottext-interaction")
                    :select (css "select.inline-choice")
                    :order (css ".order-interaction")
                    :container (xpath ".//table[./tbody/tr/td/div/div[contains(@class, 'match-interaction-container')]]")}
         tag-translation {:choiceInteraction :choice
                          :textEntryInteraction :text-input
                          :inlineChoiceInteraction :select
+                         :hottextInteraction :hottext
                          :orderInteraction :order
                          :matchInteraction [:container :link]}
         main-panel (find-qti-main-panel)
@@ -246,6 +248,24 @@
                 item (find-element (css (format ".match-interaction-item-%s" x)))]]
     (click item)
     (click container)))
+
+
+;;;; Hottext
+
+
+(defmethod interaction-derive-answer :hottext
+  [_ {a :answer
+      {content :content} :source}]
+  (->> content
+       (filter (comp (set a) :identifier :attrs first :content))
+       (map (comp first :content first :content))
+       (into #{})))
+
+
+(defmethod interaction-fill :hottext [i answer]
+  (doseq [x (find-elements (:element i) (css ".hottext"))
+          :when (answer (get-text x))]
+    (click x)))
 
 
 ;; Question-level API
