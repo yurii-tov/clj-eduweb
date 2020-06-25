@@ -19,8 +19,8 @@
 
 (defn mk-links-traverse []
   "Find direct resources links, return function for quick navigation"
-  (let [links (atom (map (fn [x] (get-attribute x "href"))
-                         (find-elements (css "a"))))]
+  (let [links (atom (mapv (fn [x] (get-attribute x "href"))
+                          (find-elements (css "a"))))]
     (fn [] (when-let [link (first @links)]
              (open-url link)
              (swap! links rest)
