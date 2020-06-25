@@ -185,7 +185,7 @@
   (->> answer
        (map (fn [a] (find-element
                      (:element i)
-                     (css (format "input[value=%s]" a)))))
+                     (css (format "input[value='%s']" a)))))
        (map click)
        dorun))
 
