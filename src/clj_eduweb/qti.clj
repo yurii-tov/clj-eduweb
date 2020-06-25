@@ -15,7 +15,7 @@
 
 
 (defn find-qti-frame []
-  (find-element (css "[name=qti-player-frame]")))
+  (find-element (css "[name=qti-player-frame], [name=sco-frame]")))
 
 
 (defn extract-qti-path [url]
