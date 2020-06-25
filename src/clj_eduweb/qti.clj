@@ -120,7 +120,7 @@
                          :inlineChoiceInteraction :select
                          :hottextInteraction :hottext
                          :orderInteraction :order
-                         :matchInteraction [:container :link]}
+                         :matchInteraction [:link :container]}
         main-panel (find-qti-main-panel)
         determine-interaction (fn [[interaction-type & variants]]
                                 (when-not interaction-type
