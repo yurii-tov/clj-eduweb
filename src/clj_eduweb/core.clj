@@ -140,6 +140,7 @@
 
 
 (defn quit-driver []
+  (swap! driver-config dissoc *driver*)
   (.quit *driver*))
 
 
