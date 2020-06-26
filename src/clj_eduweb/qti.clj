@@ -286,7 +286,17 @@
 
 
 (defn submit []
-  (click (find-element (css "#commit-button"))))
+  (let [feedback-panel (find-element (css "#feedback-panel"))]
+    (click (find-element (css "#commit-button")))
+    (wait-for (condition (displayed? feedback-panel)))
+    (let [feedback-class (get-attribute feedback-panel "class")
+          feedback-text (get-text feedback-panel)
+          feedback-type (or (some (fn [[k v]]
+                                    (when (cstr/includes? feedback-class v) k))
+                                  {:success "alert-success"
+                                   :danger "alert-danger"})
+                            :unknown)]
+      {:text feedback-text :type feedback-type})))
 
 
 (defn fill-answer []
