@@ -99,66 +99,13 @@
 ;; Interaction-level API
 
 
-(defn find-interactions [interactions-tags]
-  "Find interactions WebElements in the DOM.
-   Order found interactions by provided list of tag names,
-   e.g. [:inlineChoiceInteraction
-         :inlineChoiceInteraction
-         :simpleChoice].
-  Return vector of hashmaps like (for example)
-  {:element ...
-   :type :choice}"
-  (let [selectors {:choice (css ".choice-interaction")
-                   :text-input (css "input.text-entry")
-                   :link (css ".link-interaction")
-                   :hottext (css ".hottext-interaction")
-                   :select (css "select.inline-choice")
-                   :order (css ".order-interaction")
-                   :container (xpath ".//table[descendant::*[contains(@class, 'match-interaction')]]|.//div[descendant::*[contains(@class, 'match-interaction')]]")}
-        tag-translation {:choiceInteraction :choice
-                         :textEntryInteraction :text-input
-                         :inlineChoiceInteraction :select
-                         :hottextInteraction :hottext
-                         :orderInteraction :order
-                         :matchInteraction [:link :container]}
-        main-panel (find-qti-main-panel)
-        determine-interaction (fn [[interaction-type & variants]]
-                                (when-not interaction-type
-                                  (throw (new RuntimeException "Unable to determine interaction type")))
-                                (let [found (with-driver-config {:implicit-wait 0}
-                                              (find-elements
-                                               main-panel
-                                               (selectors interaction-type)))]
-                                  (if (seq found)
-                                    [found interaction-type]
-                                    (recur variants))))]
-    ((reduce (fn [result interaction-type]
-               (let [[elements interaction-type]
-                     (if (coll? interaction-type)
-                       (determine-interaction interaction-type)
-                       [(find-elements main-panel (selectors interaction-type))
-                        interaction-type])
-                     element-index (result interaction-type 0)
-                     element (elements element-index)
-                     interactions (result :interactions)]
-                 (assoc result
-                        interaction-type (inc element-index)
-                        :interactions (conj interactions
-                                            {:type interaction-type
-                                             :element element}))))
-             {:interactions []}
-             (map tag-translation
-                  interactions-tags))
-     :interactions)))
-
-
 (defmulti interaction-derive-answer
-  "Make interaction-specific answer data structure"
-  (fn [i _] (:type i)))
+  "Transform raw answer into interaction-specific form"
+  :type)
 
 
 (defmethod interaction-derive-answer :default
-  [_ {:keys [answer]}] answer)
+  [i] (i :answer))
 
 
 (defmulti interaction-fill
@@ -169,15 +116,75 @@
 (defmethod interaction-fill :default [_])
 
 
+(defn find-interactions []
+  "Get all interactions data (including source, WebElement, right answer)
+   Inspecting DOM as well as qti xml data from server.
+   Return vector of hashmaps like (for example)
+   {:element ...
+    :type ...
+    :source ...
+    :answer ...}"
+  (let [selectors {:choice (css ".choice-interaction")
+                   :text-input (css "input.text-entry")
+                   :link (css ".link-interaction")
+                   :hottext (css ".hottext-interaction")
+                   :select (css "select.inline-choice")
+                   :order (css ".order-interaction")
+                   :container (xpath ".//table[descendant::*[contains(@class, 'match-interaction')]]|.//div[descendant::*[contains(@class, 'match-interaction')]]")}
+        guess-interaction
+        (fn [tag] (or ({:choiceInteraction :choice
+                        :textEntryInteraction :text-input
+                        :inlineChoiceInteraction :select
+                        :hottextInteraction :hottext
+                        :orderInteraction :order
+                        :matchInteraction [:link :container]} tag)
+                      (throw (new RuntimeException (format "Unknown interaction tag: %s" tag)))))
+        main-panel (find-qti-main-panel)
+        determine-interaction (fn [[itype & variants]]
+                                (when-not itype
+                                  (throw (new RuntimeException "Unable to determine interaction type")))
+                                (let [found (with-driver-config {:implicit-wait 0}
+                                              (find-elements
+                                               main-panel
+                                               (selectors itype)))]
+                                  (if (seq found)
+                                    [found itype]
+                                    (recur variants))))]
+    ((reduce (fn [result {{:keys [tag answer]} :source
+                          :as interaction-source}]
+               (let [itype-guess (guess-interaction tag)
+                     [elements itype]
+                     (if (coll? itype-guess)
+                       (determine-interaction itype-guess)
+                       [(find-elements main-panel (selectors itype-guess))
+                        itype-guess])
+                     element-index (result itype 0)
+                     element (elements element-index)
+                     interactions (result :interactions)
+                     interaction (into interaction-source
+                                       {:type itype
+                                        :element element})
+                     answer (interaction-derive-answer
+                             interaction)]
+                 (assoc result
+                        itype (inc element-index)
+                        :interactions
+                        (conj interactions
+                              (assoc interaction :answer answer)))))
+             {:interactions []}
+             (peek-source))
+     :interactions)))
+
+
 ;;;; Text input
+
+
+(defmethod interaction-derive-answer :text-input [{:keys [answer]}]
+  (first answer))
 
 
 (defmethod interaction-fill :text-input [i answer]
   (send-keys (:element i) answer))
-
-
-(defmethod interaction-derive-answer :text-input
-  [_ {:keys [answer]}] (first answer))
 
 
 ;;;; Choice
@@ -195,7 +202,7 @@
 ;;;; Link
 
 
-(defmethod interaction-derive-answer :link [_ {:keys [answer]}]
+(defmethod interaction-derive-answer :link [{:keys [answer]}]
   (map (fn [x] (cstr/split x #" "))
        answer))
 
@@ -210,8 +217,8 @@
 
 
 (defmethod interaction-derive-answer :select
-  [_ {[a] :answer
-      {content :content} :source}]
+  [{[a] :answer
+    {content :content} :source}]
   (->> content
        (filter (comp #{a} :identifier :attrs))
        ((comp first :content first))))
@@ -237,7 +244,7 @@
 ;;;; Container
 
 
-(defmethod interaction-derive-answer :container [_ {:keys [answer]}]
+(defmethod interaction-derive-answer :container [{:keys [answer]}]
   (map (fn [x] (cstr/split x #" "))
        answer))
 
@@ -259,8 +266,7 @@
 ;;;; Hottext
 
 
-(defmethod interaction-derive-answer :hottext
-  [_ {:keys [answer source]}]
+(defmethod interaction-derive-answer :hottext [{:keys [answer source]}]
   (->> source
        zip/xml-zip
        (iterate zip/next)
@@ -300,15 +306,10 @@
 
 
 (defn fill-answer []
-  (let [interactions-data (peek-source)
-        interactions-tags (map (comp :tag :source)
-                               interactions-data)]
-    (dorun (map (fn [interaction data]
-                  (interaction-fill
-                   interaction
-                   (interaction-derive-answer interaction data)))
-                (find-interactions interactions-tags)
-                interactions-data))))
+  (dorun (map (fn [{:keys [answer] :as interaction}]
+                (interaction-fill interaction
+                                  answer))
+              (find-interactions))))
 
 
 (defn solve []
