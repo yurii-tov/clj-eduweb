@@ -99,12 +99,6 @@
    "http://185.12.155.35:8080/QtiPlayer.html?path=samples/frac/frac.xml&showSolution=true&showFeedback=true&maxAttempts=3"))
 
 
-(deftest qti-examples-test-13
-  (test-question
-   "samples/postcard/postcard.xml"
-   "http://185.12.155.35:8080/QtiPlayer.html?path=samples/postcard/postcard.xml&showSolution=true&showFeedback=true&maxAttempts=3"))
-
-
 (deftest qti-examples-test-14
   (test-question
    "samples/olympic/olympic.xml"
@@ -115,48 +109,6 @@
   (test-question
    "samples/microscopeChoice/microscopeChoice.xml"
    "http://185.12.155.35:8080/QtiPlayer.html?path=samples/microscopeChoice/microscopeChoice.xml&showSolution=true&showFeedback=true&maxAttempts=3"))
-
-
-(deftest qti-examples-test-16
-  (test-question
-   "samples/sicilia/sicilia.xml"
-   "http://185.12.155.35:8080/QtiPlayer.html?path=samples/sicilia/sicilia.xml&showSolution=true&showFeedback=true&maxAttempts=3"))
-
-
-(deftest qti-examples-test-17
-  (test-question
-   "samples/glasgow/glasgow.xml"
-   "http://185.12.155.35:8080/QtiPlayer.html?path=samples/glasgow/glasgow.xml&showSolution=true&showFeedback=true&maxAttempts=3"))
-
-
-(deftest qti-examples-test-18
-  (test-question
-   "samples/airportTags/airportTags.xml"
-   "http://185.12.155.35:8080/QtiPlayer.html?path=samples/airportTags/airportTags.xml&showSolution=true&showFeedback=true&maxAttempts=3"))
-
-
-(deftest qti-examples-test-19
-  (test-question
-   "samples/microscope/microscope.xml"
-   "http://185.12.155.35:8080/QtiPlayer.html?path=samples/microscope/microscope.xml&showSolution=true&showFeedback=true&maxAttempts=3"))
-
-
-(deftest qti-examples-test-20
-  (test-question
-   "samples/circles/circles.xml"
-   "http://185.12.155.35:8080/QtiPlayer.html?path=samples/circles/circles.xml&showSolution=true&showFeedback=true&maxAttempts=3"))
-
-
-(deftest qti-examples-test-21
-  (test-question
-   "samples/leaves/leaves.xml"
-   "http://185.12.155.35:8080/QtiPlayer.html?path=samples/leaves/leaves.xml&showSolution=true&showFeedback=true&maxAttempts=3"))
-
-
-(deftest qti-examples-test-22
-  (test-question
-   "samples/orderedContainer/orderedContainer.xml"
-   "http://185.12.155.35:8080/QtiPlayer.html?path=samples/orderedContainer/orderedContainer.xml&showSolution=true&showFeedback=true&maxAttempts=3"))
 
 
 (deftest qti-examples-test-23
@@ -235,18 +187,6 @@
   (test-question
    "samples/sentenceError/sentenceError.xml"
    "http://185.12.155.35:8080/QtiPlayer.html?path=samples/sentenceError/sentenceError.xml&showSolution=true&showFeedback=true&maxAttempts=3"))
-
-
-(deftest qti-examples-test-36
-  (test-question
-   "samples/chocolate/chocolate.xml"
-   "http://185.12.155.35:8080/QtiPlayer.html?path=samples/chocolate/chocolate.xml&showSolution=true&showFeedback=true&maxAttempts=3"))
-
-
-(deftest qti-examples-test-37
-  (test-question
-   "samples/uploads/uploads.xml"
-   "http://185.12.155.35:8080/QtiPlayer.html?path=samples/uploads/uploads.xml&showSolution=true&showFeedback=true&maxAttempts=3"))
 
 
 (deftest qti-examples-test-38
