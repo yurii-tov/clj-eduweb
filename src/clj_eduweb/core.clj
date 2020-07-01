@@ -258,6 +258,19 @@
 ;; get information about elements
 
 
+(defn get-rect
+  "Get rectangle data (coordinates and size)"
+  [element]
+  (let [rect (.getRect element)
+        [x y] ((juxt (memfn getX)
+                     (memfn getY))
+               rect)
+        [w h] ((juxt (memfn getWidth)
+                     (memfn getHeight))
+               rect)]
+    {:x x :y y :width w :height h}))
+
+
 (defn get-text [el] (cstr/trim (. el getText)))
 
 
