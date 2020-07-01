@@ -5,6 +5,7 @@
             [clojure.string :as cstr]
             [clojure.java.io :as io])
   (:import org.openqa.selenium.support.ui.Select
+           org.openqa.selenium.interactions.Actions
            org.openqa.selenium.WebElement))
 
 
@@ -130,14 +131,16 @@
                    :hottext (css ".hottext-interaction")
                    :select (css "select.inline-choice")
                    :order (css ".order-interaction")
-                   :container (xpath ".//table[descendant::*[contains(@class, 'match-interaction')]]|.//div[descendant::*[contains(@class, 'match-interaction')]]")}
+                   :container (xpath ".//table[descendant::*[contains(@class, 'match-interaction')]]|.//div[descendant::*[contains(@class, 'match-interaction')]]")
+                   :graphic-gap (xpath ".//table[descendant::*[contains(@class, 'graphic-gap-match')]]")}
         guess-interaction
         (fn [tag] (or ({:choiceInteraction :choice
                         :textEntryInteraction :text-input
                         :inlineChoiceInteraction :select
                         :hottextInteraction :hottext
                         :orderInteraction :order
-                        :matchInteraction [:link :container]} tag)
+                        :matchInteraction [:link :container]
+                        :graphicGapMatchInteraction :graphic-gap} tag)
                       (throw (new RuntimeException (format "Unknown interaction tag: %s" tag)))))
         main-panel (find-qti-main-panel)
         determine-interaction (fn [[itype & variants]]
@@ -282,6 +285,52 @@
   (doseq [x (find-elements (:element i) (css ".hottext"))
           :when (answer (get-text x))]
     (click x)))
+
+
+;;;; Graphic gap match interaction
+
+
+(defmethod interaction-derive-answer :graphic-gap [{:keys [answer source]}]
+  (let [nodes (->> source
+                   zip/xml-zip
+                   (iterate zip/next)
+                   (take-while (complement zip/end?))
+                   (map zip/node))
+        ids (map (fn [x] (cstr/split x #"\s"))
+                 answer)
+        parse-coords (fn [x] (partition 2 (map read-string (cstr/split x #","))))
+        midpoint (fn [[p1 p2]]
+                   (mapv (fn [a b] (quot (+ a b) 2)) p1 p2))]
+    (map (fn [[gap-id target-id]]
+           (vector ((comp :data :attrs first :content)
+                    (first (filter (comp #{gap-id} :identifier :attrs) nodes)))
+                   ((comp midpoint parse-coords :coords :attrs)
+                    (first (filter (comp #{target-id} :identifier :attrs) nodes)))))
+         ids)))
+
+
+(defmethod interaction-fill :graphic-gap [{:keys [element]} answer]
+  (let [midpoint (fn [p1 p2] (mapv (fn [a b] (quot (+ a b) 2)) p1 p2))
+        container (find-element element (css ".graphic-gap-match"))
+        container-rect (get-rect container)
+        container-zero ((juxt :x :y) container-rect)
+        container-mid (midpoint container-zero
+                                (map + container-zero
+                                     ((juxt :width :height) container-rect)))
+        [move-offset-x
+         move-offset-y] (map - container-zero container-mid)
+        single-spot? (= 1 (count (set (map second answer))))]
+    (doseq [[data [target-x target-y]] answer]
+      (click (first (reverse (find-elements element (css (format "[src*='%s']" data))))))
+      (when-not single-spot?
+        (.. (new Actions *driver*)
+            ;; Move mouse to upper-left corner of a container
+            (moveToElement container move-offset-x move-offset-y)
+            ;; Move mouse to target coordinates
+            (moveByOffset target-x target-y)
+            click
+            build
+            perform)))))
 
 
 ;; Question-level API

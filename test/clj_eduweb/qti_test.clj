@@ -111,6 +111,36 @@
    "http://185.12.155.35:8080/QtiPlayer.html?path=samples/microscopeChoice/microscopeChoice.xml&showSolution=true&showFeedback=true&maxAttempts=3"))
 
 
+(deftest qti-examples-test-18
+  (test-question
+   "samples/airportTags/airportTags.xml"
+   "http://185.12.155.35:8080/QtiPlayer.html?path=samples/airportTags/airportTags.xml&showSolution=true&showFeedback=true&maxAttempts=3"))
+
+
+(deftest qti-examples-test-19
+  (test-question
+   "samples/microscope/microscope.xml"
+   "http://185.12.155.35:8080/QtiPlayer.html?path=samples/microscope/microscope.xml&showSolution=true&showFeedback=true&maxAttempts=3"))
+
+
+(deftest qti-examples-test-20
+  (test-question
+   "samples/circles/circles.xml"
+   "http://185.12.155.35:8080/QtiPlayer.html?path=samples/circles/circles.xml&showSolution=true&showFeedback=true&maxAttempts=3"))
+
+
+(deftest qti-examples-test-21
+  (test-question
+   "samples/leaves/leaves.xml"
+   "http://185.12.155.35:8080/QtiPlayer.html?path=samples/leaves/leaves.xml&showSolution=true&showFeedback=true&maxAttempts=3"))
+
+
+(deftest qti-examples-test-22
+  (test-question
+   "samples/orderedContainer/orderedContainer.xml"
+   "http://185.12.155.35:8080/QtiPlayer.html?path=samples/orderedContainer/orderedContainer.xml&showSolution=true&showFeedback=true&maxAttempts=3"))
+
+
 (deftest qti-examples-test-23
   (test-question
    "samples/continents/continents.xml"
