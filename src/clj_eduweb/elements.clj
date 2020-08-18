@@ -17,14 +17,19 @@
 ;; links
 
 
-(defn mk-links-traverse []
+(defn find-links
+  ([context] (find-elements context (css "a")))
+  ([] (find-links *driver*)))
+
+
+(defn links-iterator [links]
   "Find direct resources links, return function for quick navigation"
-  (let [links (atom (mapv (fn [x] (get-attribute x "href"))
-                          (find-elements (css "a"))))]
-    (fn [] (when-let [link (first @links)]
-             (open-url link)
-             (swap! links rest)
-             link))))
+  (let [urls (atom (mapv (fn [x] (get-attribute x "href"))
+                         links))]
+    (fn [] (when-let [url (first @urls)]
+             (open-url url)
+             (swap! urls rest)
+             url))))
 
 
 ;; tables
