@@ -132,7 +132,8 @@
                    :select (css "select.inline-choice")
                    :order (css ".order-interaction")
                    :container (xpath ".//table[descendant::*[contains(@class, 'match-interaction')]]|.//div[descendant::*[contains(@class, 'match-interaction')]]")
-                   :graphic-gap (xpath ".//table[descendant::*[contains(@class, 'graphic-gap-match')]]")}
+                   :graphic-gap (xpath ".//table[descendant::*[contains(@class, 'graphic-gap-match')]]")
+                   :hotspot (css ".hotspot")}
         guess-interaction
         (fn [tag] (or ({:choiceInteraction :choice
                         :textEntryInteraction :text-input
@@ -140,6 +141,7 @@
                         :hottextInteraction :hottext
                         :orderInteraction :order
                         :matchInteraction [:link :container]
+                        :hotspotInteraction :hotspot
                         :graphicGapMatchInteraction :graphic-gap} tag)
                       (throw (new RuntimeException (format "Unknown interaction tag: %s" tag)))))
         main-panel (find-qti-main-panel)
@@ -331,6 +333,46 @@
             click
             build
             perform)))))
+
+
+;;;; Hotspot interaction
+
+
+(defmethod interaction-derive-answer :hotspot [{:keys [answer source]}]
+  (let [nodes (->> source
+                   zip/xml-zip
+                   (iterate zip/next)
+                   (take-while (complement zip/end?))
+                   (map zip/node))
+        parse-coords (fn [x] (partition 2 (map read-string (cstr/split x #","))))
+        midpoint (fn [[p1 p2]]
+                   (if p2 (mapv (fn [a b] (quot (+ a b) 2)) p1 p2)
+                       p1))]
+    (map (fn [spot-id]
+           ((comp midpoint parse-coords :coords :attrs)
+            (first (filter (comp #{spot-id} :identifier :attrs) nodes))))
+         answer)))
+
+
+(defmethod interaction-fill :hotspot [{:keys [element]} answer]
+  (let [midpoint (fn [p1 p2] (mapv (fn [a b] (quot (+ a b) 2)) p1 p2))
+        container element
+        container-rect (get-rect container)
+        container-zero ((juxt :x :y) container-rect)
+        container-mid (midpoint container-zero
+                                (map + container-zero
+                                     ((juxt :width :height) container-rect)))
+        [move-offset-x
+         move-offset-y] (map - container-zero container-mid)]
+    (doseq [[target-x target-y] answer]
+      (.. (new Actions *driver*)
+          ;; Move mouse to upper-left corner of a container
+          (moveToElement container move-offset-x move-offset-y)
+          ;; Move mouse to target coordinates
+          (moveByOffset target-x target-y)
+          click
+          build
+          perform))))
 
 
 ;; Question-level API

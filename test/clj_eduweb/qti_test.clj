@@ -111,6 +111,18 @@
    "http://185.12.155.35:8080/QtiPlayer.html?path=samples/microscopeChoice/microscopeChoice.xml&showSolution=true&showFeedback=true&maxAttempts=3"))
 
 
+(deftest qti-examples-test-16
+  (test-question
+   "samples/sicilia/sicilia.xml"
+   "http://185.12.155.35:8080/QtiPlayer.html?path=samples/sicilia/sicilia.xml&showSolution=true&showFeedback=true&maxAttempts=3"))
+
+
+(deftest qti-examples-test-16
+  (test-question
+   "samples/glasgow/glasgow.xml"
+   "http://185.12.155.35:8080/QtiPlayer.html?path=samples/glasgow/glasgow.xml&showSolution=true&showFeedback=true&maxAttempts=3"))
+
+
 (deftest qti-examples-test-18
   (test-question
    "samples/airportTags/airportTags.xml"
