@@ -197,6 +197,7 @@
 
 (defmethod interaction-fill :choice [i answer]
   (->> answer
+       (filter (complement nil?))
        (map (fn [a] (find-element
                      (:element i)
                      (css (format "input[value='%s']" a)))))
@@ -279,7 +280,7 @@
        (map zip/node)
        (filter (comp #{:hottext} :tag))
        (filter (comp (set answer) :identifier :attrs))
-       (map (comp first :content))
+       (map extract-content)
        (into #{})))
 
 
