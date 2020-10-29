@@ -185,7 +185,7 @@
 
 
 (defmethod interaction-derive-answer :text-input [{:keys [answer]}]
-  (first answer))
+  (or (first answer) ""))
 
 
 (defmethod interaction-fill :text-input [i answer]
