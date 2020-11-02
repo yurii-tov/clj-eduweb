@@ -280,7 +280,7 @@
        (map zip/node)
        (filter (comp #{:hottext} :tag))
        (filter (comp (set answer) :identifier :attrs))
-       (map extract-content)
+       (map (comp first :content))
        (into #{})))
 
 
