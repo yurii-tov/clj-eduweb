@@ -273,15 +273,19 @@
 
 
 (defmethod interaction-derive-answer :hottext [{:keys [answer source]}]
-  (->> source
-       zip/xml-zip
-       (iterate zip/next)
-       (take-while (complement zip/end?))
-       (map zip/node)
-       (filter (comp #{:hottext} :tag))
-       (filter (comp (set answer) :identifier :attrs))
-       (map (comp cstr/trim first :content))
-       (into #{})))
+  (letfn [(xml-element-text [e]
+            (if (:content e)
+              (xml-element-text (first (:content e)))
+              e))]
+    (->> source
+         zip/xml-zip
+         (iterate zip/next)
+         (take-while (complement zip/end?))
+         (map zip/node)
+         (filter (comp #{:hottext} :tag))
+         (filter (comp (set answer) :identifier :attrs))
+         (map (comp cstr/trim xml-element-text))
+         (into #{}))))
 
 
 (defmethod interaction-fill :hottext [i answer]
