@@ -305,11 +305,11 @@
   "Wait for specific condition.
   Args:
   condition  =>  ExpectedCondition instance
-  :timeout   =>  (optional) timeout in seconds (default is 3)"
-  [condition & {:keys [timeout]
-                :or {timeout 3}}]
+  :timeout   =>  (optional) timeout in seconds (default is driver's implicit-wait value)"
+  [condition & {:keys [timeout]}]
   (.. (new FluentWait *driver*)
-      (withTimeout (Duration/ofSeconds timeout))
+      (withTimeout (Duration/ofSeconds
+                    (or timeout ((@driver-config *driver*) :implicit-wait))))
       (until condition)))
 
 
