@@ -244,21 +244,21 @@
 ;; perform actions on elements
 
 
-(defn click [el] (. el click))
+(defn element-click [el] (. el click))
 
 
-(defn send-keys [input text]
+(defn element-send-keys [input text]
   (. input clear)
   (. input sendKeys (into-array [text])))
 
 
-(defn double-click [el] (.. (new Actions *driver*) (doubleClick el) perform))
+(defn element-double-click [el] (.. (new Actions *driver*) (doubleClick el) perform))
 
 
 ;; get information about elements
 
 
-(defn get-rect
+(defn element-rect
   "Get rectangle data (coordinates and size)"
   [element]
   (let [rect (.getRect element)
@@ -271,14 +271,14 @@
     {:x x :y y :width w :height h}))
 
 
-(defn get-text [el] (cstr/trim (. el getText)))
+(defn element-text [el] (cstr/trim (. el getText)))
 
 
-(defn displayed? [el]
+(defn element-displayed? [el]
   (. el isDisplayed))
 
 
-(defn stale?
+(defn element-stale?
   "Test if given element is not available in a DOM
         (i.e. request to this element will cause StaleElementReferenceException)"
   [element]
@@ -286,16 +286,16 @@
        (catch StaleElementReferenceException e true)))
 
 
-(defn get-attribute [el attr]
+(defn element-attribute [el attr]
   (. el getAttribute attr))
 
 
-(defn get-inner-html [element]
+(defn element-inner-html [element]
   (. *driver* executeScript "return arguments[0].innerHTML" (into-array [element])))
 
 
-(defn get-clean-html [element]
-  (cstr/replace (get-inner-html element) #"(<\w+)(\s[^>]+)(>)" "$1$3"))
+(defn element-clean-html [element]
+  (cstr/replace (element-inner-html element) #"(<\w+)(\s[^>]+)(>)" "$1$3"))
 
 
 ;; Wait for conditions
@@ -389,7 +389,7 @@
     "Back all elements previously colored by highlight fn, to its normal color"
     []
     (doseq [[el color] @colored]
-      (when-not (stale? el)
+      (when-not (element-stale? el)
         (set-css-property el "background-color" color)))
     (reset! colored {}))
 

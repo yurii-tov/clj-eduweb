@@ -11,7 +11,7 @@
          frame
          (with-driver-config {:implicit-wait 0}
            (qti/move-forward)))
-       (wait-for (condition (stale? frame)))
+       (wait-for (condition (element-stale? frame)))
        (catch Exception e)))
 
 
@@ -21,18 +21,18 @@
 
 
 (defn complete []
-  (click (find-element (css "#e4-library-LessonPanel-closeButton")))
-  (get-text (find-element (css ".lesson-result-score-value"))))
+  (element-click (find-element (css "#e4-library-LessonPanel-closeButton")))
+  (element-text (find-element (css ".lesson-result-score-value"))))
 
 
 (defn start []
   "Start from lesson main page"
-  (click (find-element (css "#btnStartLesson"))))
+  (element-click (find-element (css "#btnStartLesson"))))
 
 
 (defn start-again []
   "Start from results page"
-  (click (find-element (css "#e4-library-LessonStatsPanel-StartAgainButton")))
+  (element-click (find-element (css "#e4-library-LessonStatsPanel-StartAgainButton")))
   (start))
 
 

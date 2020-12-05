@@ -24,7 +24,7 @@
 
 (defn links-iterator [links]
   "Find direct resources links, return function for quick navigation"
-  (let [urls (atom (mapv (fn [x] (get-attribute x "href"))
+  (let [urls (atom (mapv (fn [x] (element-attribute x "href"))
                          links))]
     (fn [] (when-let [url (first @urls)]
              (open-url url)
@@ -52,7 +52,7 @@
                (table-rows table))]
     (->> rows
          (map (fn [r] (nth (find-elements r (css "td")) i)))
-         (map (fn [t] (let [text (get-text t)]
+         (map (fn [t] (let [text (element-text t)]
                         (when-not (empty? text) text)))))))
 
 
@@ -78,10 +78,10 @@
   [checkbox option]
   (if (= option :random)
     (checkbox-set checkbox (zero? (rand-int 2)))
-    (let [checked? (get-attribute checkbox "checked")]
+    (let [checked? (element-attribute checkbox "checked")]
       (if option
-        (or checked? (click checkbox))
-        (and checked? (click checkbox))))))
+        (or checked? (element-click checkbox))
+        (and checked? (element-click checkbox))))))
 
 
 ;; buttons
@@ -93,7 +93,7 @@
 
 
 (defn button-pressed? [button]
-  (= "true" (get-attribute button "aria-pressed")))
+  (= "true" (element-attribute button "aria-pressed")))
 
 
 ;; dialog windows
@@ -109,7 +109,7 @@
 
 
 (defn window-close [window]
-  (click (find-element window (css ".x-tool-close")))
+  (element-click (find-element window (css ".x-tool-close")))
   (wait-for-stale window))
 
 
@@ -123,7 +123,7 @@
 (defn context-menu-options
   ([context]
    (map (fn [x] (find-element x (css "span")))
-        (remove (fn [x] (cstr/includes? (get-attribute x "class") "x-menu-sep-li"))
+        (remove (fn [x] (cstr/includes? (element-attribute x "class") "x-menu-sep-li"))
                 (find-elements context (css ".x-menu-list-item")))))
   ([] (context-menu-options *driver*)))
 
@@ -152,7 +152,7 @@
    Returns combo-list"
   [combobox]
   (with-retry
-    (click (find-element combobox (css "img.x-form-trigger-arrow")))
+    (element-click (find-element combobox (css "img.x-form-trigger-arrow")))
     (wait-for (condition (let [combo-lists (find-combo-lists)]
                            (and (= 1 (count combo-lists))
                                 (first combo-lists)))))))
@@ -162,7 +162,7 @@
   [combobox]
   (let [[combo-list] (find-combo-lists)]
     (when combo-list
-      (click (find-element combobox (css "img.x-form-trigger-arrow")))
+      (element-click (find-element combobox (css "img.x-form-trigger-arrow")))
       (wait-for-stale combo-list))))
 
 
@@ -178,28 +178,28 @@
   [combobox option-spec]
   (let [options-list (find-combo-listitems (combobox-expand combobox))
         predicate (cond (string? option-spec)
-                        (fn [o] (= (get-text o) option-spec))
+                        (fn [o] (= (element-text o) option-spec))
                         (= java.util.regex.Pattern
                            (type option-spec))
                         (fn [o] (re-matches option-spec
-                                            (get-text o)))
+                                            (element-text o)))
                         :else (throw (new IllegalArgumentException
                                           (format "Wrong option spec: %s. It should be a string, or a pattern"
                                                   option-spec))))]
-    (click (if (= option-spec :random)
-             (rand-nth options-list)
-             (or (first (filter predicate options-list))
-                 (throw (new IllegalStateException
-                             (str "option not found: " option-spec
-                                  "; avalilable options is: "
-                                  (mapv get-text options-list)))))))))
+    (element-click (if (= option-spec :random)
+                     (rand-nth options-list)
+                     (or (first (filter predicate options-list))
+                         (throw (new IllegalStateException
+                                     (str "option not found: " option-spec
+                                          "; avalilable options is: "
+                                          (mapv element-text options-list)))))))))
 
 
 (defn combobox-options
   "Get list of given combobox options (as list of strings)"
   [combobox]
   (combobox-expand combobox)
-  (let [options (mapv get-text (find-combo-listitems))]
+  (let [options (mapv element-text (find-combo-listitems))]
     (combobox-collapse combobox)
     options))
 
@@ -207,4 +207,4 @@
 (defn combobox-value
   "Get current selected value of a combobox"
   [combo]
-  (get-attribute (first (find-inputs combo)) "value"))
+  (element-attribute (first (find-inputs combo)) "value"))

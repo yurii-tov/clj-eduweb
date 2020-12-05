@@ -18,7 +18,7 @@
 (defn get-page-period
   "Get period of current journal page as vector of LocalDate objects, i.e. [start end]"
   []
-  (let [text (get-text (find-element (css ".x-panel-header .x-box-item")))
+  (let [text (element-text (find-element (css ".x-panel-header .x-box-item")))
         match (re-find #"\(([0-9.]+).+?([0-9.]+)\)" text)]
     (if match
       (let [[_ & result] match]
@@ -62,15 +62,15 @@
             activity
             scale]
      :or {title :random}}]
-   (click (find-element (css "#e4-journal-TaskList-addTaskButton button")))
+   (element-click (find-element (css "#e4-journal-TaskList-addTaskButton button")))
    (let [tasks-count (count (get-tasks))
          [window] (find-windows)
          [button :as buttons] (find-buttons window)
          [_ title-input] (find-inputs window)]
-     (send-keys title-input
-                (if (= title :random)
-                  (gen-taskname)
-                  title))
+     (element-send-keys title-input
+                        (if (= title :random)
+                          (gen-taskname)
+                          title))
      (when control-work?
        (checkbox-set
         (first (find-checkboxes window))
@@ -79,9 +79,9 @@
        (let [date (cond (instance? LocalDate date)
                         (format-date date)
                         :else date)]
-         (send-keys (first (find-inputs window)) date)))
+         (element-send-keys (first (find-inputs window)) date)))
      (when (or lesson-type activity scale)
-       (click (last buttons))
+       (element-click (last buttons))
        (let [[lesson-type-combo
               activity-combo
               scale-combo] (find-comboboxes window)]
@@ -92,7 +92,7 @@
          (when scale
            (checkbox-set (last (find-checkboxes window)) true)
            (combobox-select scale-combo scale))))
-     (click button)
+     (element-click button)
      (wait-for-stale window)
      (wait-for (condition (> (count (get-tasks))
                              tasks-count))))))
@@ -132,13 +132,13 @@
   (let [valid-options '(:period :year :exam :total)]
     (assert (some #{mark} valid-options)
             (str "valid options are: " valid-options))
-    (click (find-element (css "#e4-journal-TaskList-addTaskButton .x-btn-mr")))
-    (click (first (context-menu-options (first (find-context-menus)))))
+    (element-click (find-element (css "#e4-journal-TaskList-addTaskButton .x-btn-mr")))
+    (element-click (first (context-menu-options (first (find-context-menus)))))
     (let [[window] (find-windows)
           options (find-radio-buttons window)
           option (get (into {} (map vector valid-options options)) mark)]
-      (click option)
-      (click (first (find-buttons window)))
+      (element-click option)
+      (element-click (first (find-buttons window)))
       (wait-for-stale window))))
 
 
@@ -152,14 +152,14 @@
   (let [cells (get-cells)
         get-col-num (fn [c]
                       (second (re-find #"x-grid3-td-markColumn(\d+)"
-                                       (get-attribute c "class"))))
+                                       (element-attribute c "class"))))
         col-count (count (set (map get-col-num cells)))]
     (apply map vector (partition col-count cells))))
 
 
 (defn get-column [taskname]
   ((get-columns)
-   (. (mapv get-text (get-tasks)) indexOf taskname)))
+   (. (mapv element-text (get-tasks)) indexOf taskname)))
 
 
 ;; marks
@@ -169,7 +169,7 @@
   "Apply changes to given cell
   edit => function of dialog window"
   [cell edit]
-  (double-click cell)
+  (element-double-click cell)
   (let [[w] (find-windows)]
     (edit w)
     (window-close w)
@@ -185,16 +185,16 @@
    (fn [w]
      (->> w
           find-buttons
-          (filter (fn [b] (= mark (get-text b))))
-          first click))))
+          (filter (fn [b] (= mark (element-text b))))
+          first element-click))))
 
 
 (defn clear-mark [cell]
-  (when (or (seq (get-text cell))
-            (cstr/includes? (get-attribute cell "class")
+  (when (or (seq (element-text cell))
+            (cstr/includes? (element-attribute cell "class")
                             "to-survey"))
     (edit-mark cell
-               (fn [w] (click (first (filter button-pressed? (find-buttons w))))))))
+               (fn [w] (element-click (first (filter button-pressed? (find-buttons w))))))))
 
 
 (defn set-random-mark
@@ -202,9 +202,9 @@
   [cell & marks-to-exclude]
   (edit-mark cell
              (fn [w]
-               (let [not-excluded? (comp (complement (set marks-to-exclude)) get-text)
-                     buttons (filter (every-pred not-excluded? displayed?) (find-buttons w))]
-                 (click (rand-nth buttons))))))
+               (let [not-excluded? (comp (complement (set marks-to-exclude)) element-text)
+                     buttons (filter (every-pred not-excluded? element-displayed?) (find-buttons w))]
+                 (element-click (rand-nth buttons))))))
 
 
 (defn set-random-marks

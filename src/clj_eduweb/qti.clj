@@ -27,7 +27,7 @@
   [frame & body]
   `(let [frame# ~frame]
      (binding [*qti-frame*
-               {:src (get-attribute frame# "src")}]
+               {:src (element-attribute frame# "src")}]
        (with-frame frame#
          ~@body))))
 
@@ -189,7 +189,7 @@
 
 
 (defmethod interaction-fill :text-input [i answer]
-  (send-keys (:element i) answer))
+  (element-send-keys (:element i) answer))
 
 
 ;;;; Choice
@@ -201,7 +201,7 @@
        (map (fn [a] (find-element
                      (:element i)
                      (css (format "input[value='%s']" a)))))
-       (map click)
+       (map element-click)
        dorun))
 
 
@@ -216,7 +216,7 @@
 (defmethod interaction-fill :link [i answer]
   (doseq [xs answer
           x xs]
-    (click (find-element (css (format ".match-interaction-item-%s" x))))))
+    (element-click (find-element (css (format ".match-interaction-item-%s" x))))))
 
 
 ;;;; Select
@@ -241,8 +241,8 @@
   (dorun (map (fn [i x]
                 (let [items (find-elements (css ".order-interaction-item"))
                       element (find-element (css (format ".order-interaction-item-%s" x)))]
-                  (click element)
-                  (click (items i))))
+                  (element-click element)
+                  (element-click (items i))))
               (range)
               answer)))
 
@@ -261,12 +261,12 @@
                                         (css (format ".match-interaction-container-%s" c)))
                 item (find-element (:element i)
                                    (css (format ".match-interaction-items .match-interaction-item-%s" x)))]]
-    (click item)
+    (element-click item)
     (if-let [heading (first (with-driver-config {:implicit-wait 0}
                               (find-elements container
                                              (css ".panel-heading"))))]
-      (click heading)
-      (click container))))
+      (element-click heading)
+      (element-click container))))
 
 
 ;;;; Hottext
@@ -290,8 +290,8 @@
 
 (defmethod interaction-fill :hottext [i answer]
   (doseq [x (find-elements (:element i) (css ".hottext"))
-          :when (answer (get-text x))]
-    (click x)))
+          :when (answer (element-text x))]
+    (element-click x)))
 
 
 ;;;; Graphic gap match interaction
@@ -319,7 +319,7 @@
 (defmethod interaction-fill :graphic-gap [{:keys [element]} answer]
   (let [midpoint (fn [p1 p2] (mapv (fn [a b] (quot (+ a b) 2)) p1 p2))
         container (find-element element (css ".graphic-gap-match"))
-        container-rect (get-rect container)
+        container-rect (element-rect container)
         container-zero ((juxt :x :y) container-rect)
         container-mid (midpoint container-zero
                                 (map + container-zero
@@ -328,14 +328,14 @@
          move-offset-y] (map - container-zero container-mid)
         single-spot? (= 1 (count (set (map second answer))))]
     (doseq [[data [target-x target-y]] answer]
-      (click (first (reverse (find-elements element (css (format "[src*='%s']" data))))))
+      (element-click (first (reverse (find-elements element (css (format "[src*='%s']" data))))))
       (when-not single-spot?
         (.. (new Actions *driver*)
             ;; Move mouse to upper-left corner of a container
             (moveToElement container move-offset-x move-offset-y)
             ;; Move mouse to target coordinates
             (moveByOffset target-x target-y)
-            click
+            element-click
             build
             perform)))))
 
@@ -362,7 +362,7 @@
 (defmethod interaction-fill :hotspot [{:keys [element]} answer]
   (let [midpoint (fn [p1 p2] (mapv (fn [a b] (quot (+ a b) 2)) p1 p2))
         container element
-        container-rect (get-rect container)
+        container-rect (element-rect container)
         container-zero ((juxt :x :y) container-rect)
         container-mid (midpoint container-zero
                                 (map + container-zero
@@ -375,7 +375,7 @@
           (moveToElement container move-offset-x move-offset-y)
           ;; Move mouse to target coordinates
           (moveByOffset target-x target-y)
-          click
+          element-click
           build
           perform))))
 
@@ -384,15 +384,15 @@
 
 
 (defn show-answer []
-  (click (find-element (css "#show-solution-button"))))
+  (element-click (find-element (css "#show-solution-button"))))
 
 
 (defn submit []
   (let [feedback-panel (find-element (css "#feedback-panel"))]
-    (click (find-element (css "#commit-button")))
-    (wait-for (condition (displayed? feedback-panel)))
-    (let [feedback-class (get-attribute feedback-panel "class")
-          feedback-text (get-text feedback-panel)
+    (element-click (find-element (css "#commit-button")))
+    (wait-for (condition (element-displayed? feedback-panel)))
+    (let [feedback-class (element-attribute feedback-panel "class")
+          feedback-text (element-text feedback-panel)
           feedback-type (or (some (fn [[k v]]
                                     (when (cstr/includes? feedback-class v) k))
                                   {:success "alert-success"
@@ -415,4 +415,4 @@
 
 
 (defn move-forward []
-  (click (find-element (css "#next-button"))))
+  (element-click (find-element (css "#next-button"))))
