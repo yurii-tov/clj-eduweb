@@ -29,6 +29,11 @@ clj-eduweb.repl> (def links (find-elements (css "a")))
 clj-eduweb.repl> (map element-text links)
 ```
 
-### Next steps
+### Quit driver, close browser
+```clojure
+clj-eduweb.repl> (quit-driver)
+```
+
+## Next steps
 Explore namespaces :)
 Base functionality is `clj-eduweb.core` and `clj-eduweb.elements`
