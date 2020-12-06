@@ -3,13 +3,8 @@
            java.time.format.DateTimeFormatter)
   (:require [clj-eduweb.core :refer :all]
             [clj-eduweb.elements :refer :all]
+            [clj-eduweb.date :refer :all]
             [clojure.string :as cstr]))
-
-
-(def ^:dynamic *date-format* "dd.MM.yy")
-
-
-(declare parse-date format-date)
 
 
 ;; page info
@@ -213,14 +208,3 @@
   (foreach-element [cell (get-cells)]
                    (and (> (rand-int 10) 0)
                         (apply set-random-mark cell marks-to-exclude))))
-
-
-;; utils
-
-
-(defn parse-date [s]
-  (LocalDate/parse s (DateTimeFormatter/ofPattern *date-format*)))
-
-
-(defn format-date [date]
-  (.format date (DateTimeFormatter/ofPattern *date-format*)))
