@@ -1,6 +1,6 @@
 (ns clj-eduweb.journal
-  (:import java.time.LocalDate
-           java.time.format.DateTimeFormatter)
+  (:import java.util.UUID
+           java.time.LocalDate)
   (:require [clj-eduweb.core :refer :all]
             [clj-eduweb.elements :refer :all]
             [clj-eduweb.date :refer :all]
@@ -29,7 +29,7 @@
 
 
 (defn gen-taskname []
-  (apply str (take 8 (uuid))))
+  (apply str (take 8 (str (UUID/randomUUID)))))
 
 
 (defn add-task
@@ -98,7 +98,7 @@
   Parameters:
   Hashmap, same as for add-task, but with some additions.
   :count - number of tasks to add
-  :date  - string, LocalDate or generator function. See mk-date-gen in clj-eduweb.core namespace
+  :date  - string, LocalDate or generator function. See mk-date-gen in clj-eduweb.date namespace
   :step  - interval between dates. ignored if :date is specified"
   [{:keys [date count step]
     :as args

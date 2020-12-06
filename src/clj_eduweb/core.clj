@@ -23,7 +23,6 @@
               Duration)
    (java.time.format DateTimeFormatter)
    java.util.concurrent.TimeUnit
-   java.util.UUID
    java.net.URL)
   (:require [clojure.string :as cstr]
             [clojure.java.io :as io]
@@ -255,6 +254,20 @@
 (defn element-double-click [el] (.. (new Actions *driver*) (doubleClick el) perform))
 
 
+(defn element-set-css
+  "Set given css property of element.
+  Example:
+  (element-set-css (find-element (css \"button\"))
+                    \"background-color\"
+                    \"green\")"
+  [el prop value]
+  (.executeScript *driver*
+                  (format "arguments[0].style['%s'] = '%s';"
+                          prop
+                          value)
+                  (into-array [el])))
+
+
 ;; get information about elements
 
 
@@ -345,27 +358,6 @@
          (range 0 (count ~find-expression)))))
 
 
-;; utils
-
-
-(defn uuid []
-  (str (UUID/randomUUID)))
-
-
-(defn set-css-property
-  "Set given css property of element.
-  Example:
-  (set-css-property (find-element (css \"button\"))
-                    \"background-color\"
-                    \"green\")"
-  [el prop value]
-  (.executeScript *driver*
-                  (format "arguments[0].style['%s'] = '%s';"
-                          prop
-                          value)
-                  (into-array [el])))
-
-
 ;; elements highlighting
 
 
@@ -376,7 +368,7 @@
     []
     (doseq [[el color] @colored]
       (when-not (element-stale? el)
-        (set-css-property el "background-color" color)))
+        (element-set-css el "background-color" color)))
     (reset! colored {}))
 
   (defn highlight
@@ -392,4 +384,4 @@
       (let [old-color (.getCssValue target "background-color")]
         (swap! colored
                (fn [m] (assoc m target old-color)))
-        (set-css-property target "background-color" "yellow")))))
+        (element-set-css target "background-color" "yellow")))))
