@@ -49,15 +49,14 @@
   "Configure given webdriver instance, store config for further re-definition
    Recognized options:
    :implicit-wait  (implicit wait in seconds)"
-  [driver {:keys [implicit-wait]
-           :or {implicit-wait 3}
-           :as config}]
-  (when implicit-wait
+  [driver config]
+  (let [default-config {:implicit-wait 3}
+        config (merge default-config config)]
     (.. driver
         manage
         timeouts
-        (implicitlyWait implicit-wait TimeUnit/SECONDS)))
-  (swap! driver-config assoc driver config))
+        (implicitlyWait (config :implicit-wait) TimeUnit/SECONDS))
+    (swap! driver-config assoc driver config)))
 
 
 (defmacro with-driver-config
