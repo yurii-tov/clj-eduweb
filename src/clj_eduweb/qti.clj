@@ -216,7 +216,8 @@
 (defmethod interaction-fill :link [i answer]
   (doseq [xs answer
           x xs]
-    (element-click (find-element (css (format ".match-interaction-item-%s" x))))))
+    (element-click (first (filter element-displayed?
+                                  (find-elements (css (format ".match-interaction-item-%s" x))))))))
 
 
 ;;;; Select
