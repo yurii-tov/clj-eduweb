@@ -32,17 +32,16 @@
 ;; driver management
 
 
-(def ^:dynamic *driver*)
-
-
-(def driver-config (atom {}))
+(declare ^:dynamic *driver*)
 
 
 (defn set-driver!
   "Mutate *driver* dynamic variable"
   [driver]
-  (alter-var-root (var *driver*)
-                  (constantly driver)))
+  (def ^:dynamic *driver* driver))
+
+
+(def driver-config (atom {}))
 
 
 (defn config-driver!
@@ -70,9 +69,8 @@
 
 
 (defmulti start-driver
-  "Configure and start new webdriver instance,
-   by default mutate *driver* dynamic var (see set-driver!).
-   Return WebDriver instance
+  "Start new webdriver session
+   Return: WebDriver instance
    Args: hashmap
    Recognized keys:
    :browser      ; [keyword]           browser type
