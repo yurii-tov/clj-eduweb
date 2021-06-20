@@ -85,10 +85,12 @@
   :browser)
 
 
-(defn startup-config [driver {:keys [url anonymous?] :as options}]
-  "Perform all configurations needed when starting new driver instance.
-   i.e. configure driver itself, set up global settings.
-   Return provided WebDriver instance"
+(defn startup-config
+  "Perform all necessary webdriver startup activities:
+   - Configure given webdriver instance
+   - Optionally mutate driver global variable
+   - Optionally navigate to some url"
+  [driver {:keys [url anonymous?] :as options}]
   (when-not anonymous? (set-driver! driver))
   (config-driver! driver options)
   (when url (.get driver url))
