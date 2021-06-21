@@ -11,6 +11,7 @@
     WebElement
     By
     OutputType
+    Dimension
     StaleElementReferenceException)
    org.openqa.selenium.remote.RemoteWebDriver
    org.openqa.selenium.interactions.Actions
@@ -47,15 +48,19 @@
 (defn config-driver!
   "Configure given webdriver instance, store config for further re-definition
    Recognized options:
-   :implicit-wait  (implicit wait in seconds)"
-  [driver config]
-  (let [default-config {:implicit-wait 3}
+   :implicit-wait ; (implicit wait in seconds)
+   :window-size   ; vector of [width height]"
+  [config]
+  (let [default-config (or (@driver-config *driver*)
+                           {:implicit-wait 3})
         config (merge default-config config)]
-    (.. driver
+    (.. *driver*
         manage
         timeouts
         (implicitlyWait (config :implicit-wait) TimeUnit/SECONDS))
-    (swap! driver-config assoc driver config)))
+    (when-let [[w h] (config :window-size)]
+      (.. *driver* manage window (setSize (new Dimension w h))))
+    (swap! driver-config assoc *driver* config)))
 
 
 (defmacro with-driver-config
@@ -63,9 +68,9 @@
    See config-driver!"
   [config & body]
   `(let [~'old-config ((deref driver-config) *driver*)]
-     (config-driver! *driver* ~config)
+     (config-driver! ~config)
      (try ~@body
-          (finally (config-driver! *driver* ~'old-config)))))
+          (finally (config-driver! ~'old-config)))))
 
 
 (defmulti start-driver
@@ -92,7 +97,8 @@
    - Optionally navigate to some url"
   [driver {:keys [url anonymous?] :as options}]
   (when-not anonymous? (set-driver! driver))
-  (config-driver! driver options)
+  (binding [*driver* driver]
+    (config-driver! options))
   (when url (.get driver url))
   driver)
 
